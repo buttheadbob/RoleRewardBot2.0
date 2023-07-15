@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<PluginManifest xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <Name>RoleRewardBot</Name>
+  <Guid>f304773c-5e04-411a-a523-d4120cf3735b</Guid>
+  <Repository>None</Repository>
+  <Version>v1.0.0</Version>
+</PluginManifest>

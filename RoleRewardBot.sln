@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.6.33801.468
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RoleRewardBot", "RoleRewardBot.csproj", "{18763963-8401-40A0-A999-1F2AC37DBC8C}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Release|x64 = Release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{18763963-8401-40A0-A999-1F2AC37DBC8C}.Debug|x64.ActiveCfg = Debug|x64
+		{18763963-8401-40A0-A999-1F2AC37DBC8C}.Debug|x64.Build.0 = Debug|x64
+		{18763963-8401-40A0-A999-1F2AC37DBC8C}.Release|x64.ActiveCfg = Release|x64
+		{18763963-8401-40A0-A999-1F2AC37DBC8C}.Release|x64.Build.0 = Release|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {3CAB5D16-DBE0-4583-B5A3-5FB67BE585E6}
+	EndGlobalSection
+EndGlobal
