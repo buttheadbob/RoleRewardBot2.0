@@ -5,27 +5,323 @@
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:RoleRewardBot"
       mc:Ignorable="d" 
-      d:DesignHeight="450" d:DesignWidth="800">
+      d:DesignHeight="450" d:DesignWidth="800" Background="#FF1E1E1E">
 
     <Grid>
-
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="Auto" SharedSizeGroup="Labels"/>
+            <ColumnDefinition Width="20"/>
             <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="Auto" SharedSizeGroup="Buttons"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="20"/>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
+            <RowDefinition Height="60"/>
             <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="40"/>
         </Grid.RowDefinitions>
+            
+        <Label Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="2" Content="Rewards Bot" FontSize="40" FontWeight="Heavy" Foreground="#FF27E915"/>
 
-        <TextBlock Grid.Column="0" Grid.Row ="0" VerticalAlignment="Center" Text="RoleRewardBot" FontWeight="Bold" FontSize="16" Grid.ColumnSpan="2" Margin="5"/>
+        <TabControl Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2">
+            <TabItem Header="Settings" >
+                <Grid Background="LightSlateGray">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="10" />
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="5"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="10" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    
+                    <StackPanel Grid.Column="1" Grid.Row="5" UseLayoutRounding="True" Background="Cornsilk">
+                        <CheckBox Name="EnableOnlineCheckBox" IsChecked="{Binding EnabledOnline }" Content="Run bot when server goes online." Click="EnableOnlineCheckBox_OnClick"/>
+                        <CheckBox Name="EnableOfflineCheckBox" IsChecked="{Binding EnabledOffline }" Content="Run bot before server starts." Click="EnableOfflineCheckBox_OnClick"/>
+                        <CheckBox Name="RemoveBannedUsersFromRegistryCheckBox" IsChecked="{Binding RemoveBannedUsersFromRegistry }" Content="Removed users from registry when banned." ToolTip="This will result in removing players from short term bans also." Click="RemoveBannedUsersFromRegistryCheckBox_OnClick"/>
+                        
+                        <Label Content="Bot Status Message" Margin="0,5,0,0"/>
+                        <TextBox Text="{Binding BotStatusMessage}" ToolTip="Bot status message.  Default --> Rewarding..." Margin="2,0,2,0"/>
+                        
+                        <Label Content="Bot Token" Margin="0,5,0,0"/>
+                        <TextBox Text="{Binding BotKey}" ToolTip="Bot KEY/TOKEN" Margin="2,0,2,0"/>
+                        
+                        <Label Content="Bot Name" Margin="0,5,0,0"/>
+                        <TextBox Text="{Binding BotName}" ToolTip="Bot Name to use on Discord." Margin="2,0,2,0"/>
+                        
+                        <Button Content="Save Config" Margin="5" Click="SaveButton_OnClick"/>
+                    </StackPanel>
+    
+                    <StackPanel Grid.Column="3" Grid.Row="5" UseLayoutRounding="True" Background="DarkSlateGray">
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" DataContext="Instance.Config">
+                            <Label Content="Bot Status: " FontSize="20" FontWeight="Bold"/>
+                            <Label Name="StatusLabel" Content="{Binding Path=BotStatus}" FontSize="20" FontWeight="Bold" />
+                        </StackPanel>
+                        
+                        <Button Name="ForceBotOnline" Content="Force Bot Online" Margin="3" Click="ForceBotOnline_OnClick" />
+                        <Button Name="ForceBotOffline" Content="Force Bot Offline" Margin="3" Click="ForceBotOffline_OnClick"/>
+                        <Button Name="ForceBoosterRewardPayoutUnpaid" Content="Force Role Rewards Payout (Unpaid Members)" Margin="3" Click="ForceBoosterRewardPayout_OnClick" />
+                        <StackPanel Orientation="Horizontal" Width="Auto">
+                            <Button Name="ForceBoosterRewardPayoutAll" Content="Force Role Rewards Payout (ALL Members)" Margin="3" Click="ForceBoosterRewardPayoutAll_OnClick" />
+                            <ComboBox Name="ForceSelectedPayoutToAll" Margin="0,2,0,2">
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding Path=Name}"/>
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+                            </ComboBox>
+                        </StackPanel>
+                        <StackPanel UseLayoutRounding="True" Background="DarkGray">
+                            <Label Content="Reward Management" Margin="0,5,0,0" HorizontalAlignment="Center" Foreground="#FF27E915" Background="Black" FontWeight="Heavy">
+                            </Label>
+                            <StackPanel Orientation="Horizontal">                                    
+                                <Label Content="Name:"/>
+                                <TextBox Name = "NewCommandName" Width="284" Margin="0,2,0,2"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <Label Content="Command:"/>
+                                <TextBox Name="CommandText" Width="260" Margin="0,2,0,2"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <Label Content="Role:"/>
+                                <TextBox Name="tbCommandRole" Width="130" Margin="32,2,0,2"/>
+                                <ComboBox Name="tbRoleComboBox" Width="130" Margin="0,2,0,2" SelectionChanged="TbRoleComboBox_OnSelectionChanged" >
+                                    <ComboBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding Path=Name}"/>
+                                        </DataTemplate>
+                                    </ComboBox.ItemTemplate>
+                                </ComboBox>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <Label Content="Days until expired:"/>
+                                <TextBox Name="Expires" ToolTip="Days until reward expires. Default is set to 10,000 years." Width="221" Margin="0,2,0,2" Text="365242"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <Label Content="PayDay(s):"/>
+                                <TextBox Name="tbDaysToPay" ToolTip="Days of the month to issue reward.  For multiple days, separate the days with commas -> 1,8,15,22 " Width="265" Margin="0,2,0,2"/>
+                            </StackPanel>
+                            <Button Name="NewCommand" Margin="0,2,5,2" Width="120" Click="NewCommand_OnClick">Add New Reward</Button>
+                            
+                            <Button Name="DeleteSelectedReward" Margin="2,0,2,0" Click="DeleteSelectedReward_OnClick">Remove Selected Reward</Button>
+                            <TextBlock Name="ShowCommand" Background="Black" Foreground="#FF27E915" Text="Selecting a command will display here."/>
+                             <DataGrid Name="RewardCommandsList" AutoGenerateColumns="False" CanUserAddRows="False" SelectionChanged="RewardCommandsList_OnSelected" >
+                                 <DataGrid.Columns>
+                                     <DataGridTextColumn Header="ID" Width="50" Binding="{Binding ID}" IsReadOnly="True"/>
+                                     <DataGridTextColumn Header="Name" Width="Auto" Binding="{Binding Name}" IsReadOnly="True"/>
+                                     <DataGridTextColumn Header="Role" Width="Auto" MinWidth="100" Binding="{Binding Path=CommandRole}" IsReadOnly="True"/>
+                                     <DataGridTextColumn Header="PayDay(s)" Width="Auto" MinWidth="100" Binding="{Binding Path=DaysToPay}" IsReadOnly="True"/>
+                                     <DataGridTextColumn Header="Expires" Width="Auto" MinWidth="50" Binding="{Binding Path=ExpiresInDays}" IsReadOnly="True"/>
+                                 </DataGrid.Columns>
+                             </DataGrid>
+                        </StackPanel>
+                    </StackPanel>
+                </Grid>
+            </TabItem>
+            <TabItem Header="Payouts" >
+                <Grid Background="LightSlateGray">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="10" />
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="5"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="10" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    
+                    <Border Grid.Row="1" Grid.Column="1" BorderBrush="DarkGreen" BorderThickness="5,0,5,0" CornerRadius="10" Width="300">
+                        <Grid Background="Gray">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="5"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            <Label Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="3" Content="Edit Selected Payout" FontWeight="Bold" FontSize="20" HorizontalAlignment="Center"/>
+                            
+                            <Label Grid.Column="0" Grid.Row="1" Content="In-Game Name:"/>
+                            <TextBox Name="TbEditInGameName" Grid.Column="2" Grid.Row="1" Margin="0,2,5,2"/>
+                            
+                            <Label Grid.Column="0" Grid.Row="2" Content="SteamID:"/>
+                            <TextBox Name="TbEditSteamId" Grid.Column="2" Grid.Row="2" Margin="0,2,5,2"/>
+                            
+                            <Label Grid.Column="0" Grid.Row="3" Content="Discord Name:"/>
+                            <TextBox Name="TbEditDiscordName" Grid.Column="2" Grid.Row="3" Margin="0,2,5,2"/>
+                            
+                            <Label Grid.Column="0" Grid.Row="4" Content="Discord ID:"/>
+                            <TextBox Name="TbEditDiscordID" Grid.Column="2" Grid.Row="4" Margin="0,2,5,2"/>
+                            
+                            <Label Grid.Column="0" Grid.Row="5" Content="Command: "/>
+                            <TextBox Name="tbEditCommand" Grid.Column="2" Grid.Row="5" Margin="0,2,5,2"/>
+                            
+                            <Label Grid.Column="0" Grid.Row="6" Content="Days until expired:"/>
+                            <TextBox Name="TbEditExpiry" Grid.Column="2" Grid.Row="6" Margin="0,2,5,2"/>
+                            
+                            <Button Name="EditPayout" Grid.Column="0" Grid.Row="7" Grid.ColumnSpan="3" Content="Edit Payout" Margin="5,2,5,2" Click="EditPayout_OnClick" />
+                            <Button Name="DeletePayout" Grid.Column="0" Grid.Row="8" Grid.ColumnSpan="3" Content="Delete Payout" Margin="5,2,5,2" Click="DeletePayout_OnClick" />
+                        </Grid>
+                    </Border>
+                            <Border Grid.Row="1" Grid.Column="3" BorderBrush="DarkGreen" BorderThickness="5,0,5,0" CornerRadius="10" Width="300">
+                        <Grid Background="Gray">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="5"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                                
+                            <Label Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="3" Content="Create Payout" FontWeight="Bold" FontSize="20" HorizontalAlignment="Center"/>
+                            
+                            <Label Grid.Column="0" Grid.Row="1" Content="In-Game Name:"/>
+                            <TextBox Name="tbInGameName" Grid.Column="2" Grid.Row="1" Margin="0,2,5,2"/>
+                            
+                            <Label Grid.Column="0" Grid.Row="2" Content="SteamID:"/>
+                            <TextBox Name="tbSteamID" Grid.Column="2" Grid.Row="2" Margin="0,2,5,2"/>
+                            
+                            <Label Grid.Column="0" Grid.Row="3" Content="Discord Name:"/>
+                            <TextBox Name="tbDiscordName" Grid.Column="2" Grid.Row="3" Margin="0,2,5,2"/>
+                            
+                            <Label Grid.Column="0" Grid.Row="4" Content="Discord ID:"/>
+                            <TextBox Name="tbDiscordID" Grid.Column="2" Grid.Row="4" Margin="0,2,5,2"/>
+                            
+                            <Label Grid.Column="0" Grid.Row="5" Content="Command:" ToolTip="Only one command per payout can be used with manual creation."/>
+                            <TextBox Name="tbCommand" Grid.Column="2" Grid.Row="5" Margin="0,2,5,2"/>
+                            
+                            <Label Grid.Column="0" Grid.Row="6" Content="Days until Expired:"/>
+                            <TextBox Name="tbManualExpires" Grid.Column="2" Grid.Row="6" Margin="0,2,5,2"/>
+                            
+                            <Button Name="CreateManualPayout" Grid.Column="0" Grid.Row="7" Grid.ColumnSpan="3" Content="Create Payout" Margin="5,2,5,2" Click="CreateManualPayout_OnClick"/>
+                        </Grid>
+                    </Border>
+                    
+                    <DataGrid Grid.Column="1" Grid.Row="5" Grid.ColumnSpan="3" Name="PayoutList" ItemsSource="{Binding Payouts}" AutoGenerateColumns="False" CanUserAddRows="False" SelectionChanged="PayoutList_OnSelectionChanged" AlternatingRowBackground="Cyan" SelectionMode="Single" VerticalScrollBarVisibility="Visible">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="ID" Binding="{Binding Path=ID}" Width="*" IsReadOnly="True"/>
+                            <DataGridTextColumn Header="Reward" Binding="{Binding Path=RewardName}" Width="*" IsReadOnly="True"/>
+                            <DataGridTextColumn Header="In-Game Name" Binding="{Binding Path=IngameName}" Width="*" IsReadOnly="True"/>
+                            <DataGridTextColumn Header="SteamID" Binding="{Binding Path=SteamID}" Width="*"/>
+                            <DataGridTextColumn Header="Discord Name" Binding="{Binding Path=DiscordName}" Width="*" IsReadOnly="True"/>
+                            <DataGridTextColumn Header="Date Issued" Binding="{Binding Path=PaymentDate}" Width="*" IsReadOnly="True"/>
+                            <DataGridTextColumn Header="Days Until Expired" Binding="{Binding Path=DaysUntilExpired}" Width="*" IsReadOnly="True"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </TabItem>
+            
+            <TabItem Header="Discord" IsSelected="True">
+                <Grid Background = "LightSlateGray">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="10"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="10"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="10"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="10"/>
+                        <RowDefinition Height="30"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="10"/>
+                    </Grid.RowDefinitions>
+                    <Border Grid.Row="1" Grid.Column="1" BorderBrush="DarkGreen" BorderThickness="5,0,5,0" CornerRadius="10" Width="300">
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                            <TextBlock Text="Discord Members: " HorizontalAlignment="Center" Margin="5" />
+                            <TextBlock Name="FilteredCount" Text="Showing / Total" Margin="5"/>
+                        </StackPanel>
+                    </Border>
+    
+                    <StackPanel Grid.Row="2" Grid.Column="1" VerticalAlignment="Top">
+                        <TextBox Name="FilterDiscordMembers" ToolTip="Filter members as you type!" KeyUp="FilterDiscordMembers_OnKeyUp"/>
+                        <DataGrid Name="DiscordMembersGrid" AutoGenerateColumns="False" CanUserAddRows="False" AlternatingRowBackground="AntiqueWhite" Height="300" VerticalScrollBarVisibility="Auto" SelectionMode="Single" MaxWidth="400">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Username" Binding="{Binding Path=Username}" Width="100" IsReadOnly="True"/>
+                                <DataGridTextColumn Header="Nickname" Binding="{Binding Path=Nickname}" Width="100" IsReadOnly="True"/>
+                                <DataGridTextColumn Header="UserID" Binding="{Binding Path=Id}" Width="*" IsReadOnly="True"/>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </StackPanel>
 
-       
+                    <Border Grid.Row="1" Grid.Column="3" BorderBrush="DarkGreen" BorderThickness="5,0,5,0" CornerRadius="10" Width="300" HorizontalAlignment="Center">
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                            <TextBlock Text="Registered Members" Width="120" HorizontalAlignment="Center" Margin="5"/>
+                            <TextBlock Name="FilteredRegisteredCount" Text="Showing / Total" Margin="5"/>
+                        </StackPanel>
+                    </Border>
+                    <StackPanel Grid.Row="2" Grid.Column="3" VerticalAlignment="Top">
+                        <TextBox Name="FilterRegisteredMembers" ToolTip="Filter register members as you type!!" KeyUp="FilterRegisteredMembers_OnKeyUp"/>
+                        <DataGrid Name="RegisteredMembersGrid" AutoGenerateColumns="False" CanUserAddRows="False" SelectionMode="Single" AlternatingRowBackground="AntiqueWhite" Height="300" VerticalScrollBarVisibility="Auto">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Username" Binding="{Binding Path=IngameName}" Width="Auto" IsReadOnly="True"/>
+                                <DataGridTextColumn Header="SteamID" Binding="{Binding Path=IngameSteamId}" Width="Auto" IsReadOnly="True"/>
+                                <DataGridTextColumn Header="Discord Name" Binding="{Binding Path=DiscordUsername}" Width="Auto" IsReadOnly="True"/>
+                                <DataGridTextColumn Header="Discord ID" Binding="{Binding Path=DiscordId}" Width="Auto" IsReadOnly="True"/>
+                                <DataGridTextColumn Header="Last Payout" Binding="{Binding Path=LastPayout}" Width="Auto" IsReadOnly="True"/>
+                                <DataGridTextColumn Header="Registered" Binding="{Binding Path=Registered}" Width="*" IsReadOnly="True"/>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </StackPanel>
+                    
+                    
+                    <Button Name="SendDmToPlayer" Grid.Row="4" Grid.Column="1" Height="30" Background="DarkRed" Foreground="Azure" Content="Send Message To Selected Discord Member" Margin="3" ToolTip="This will send a DM to the selected player.  They will be notified that all responses will not be received." Click="SendDmToPlayer_OnClick"/>
+                    <Button Name="RemoveRegisteredMember" Grid.Row="4" Grid.Column="3" Height="30" Background="DarkRed" Foreground="Azure" Content="Remove Selected Registered Member" Margin="3" Click="RemoveRegisteredMember_OnClick"/>
+                </Grid>
+            </TabItem>
+            
+            <TabItem Header="Help" >
+                <StackPanel>
+                    <TextBlock Text="Their is too much information and the setup guide with pictures to put here.  Instead please come to my Discord."/>
+                    <TextBlock Text="In the welcome channel, select the RewardsBot role for access."/>
+                    <TextBlock>
+                        <Hyperlink NavigateUri="https://discord.gg/rSuxGrHrrt" RequestNavigate="Hyperlink_OnRequestNavigate">https://discord.gg/rSuxGrHrrt</Hyperlink>
+                    </TextBlock>
+                    <TextBlock Margin="0,10,0,0" Text="I recommend Crunch's plugin  ->">
+                        <Hyperlink NavigateUri="https://torchapi.com/plugins/view/b2a19d95-1bfa-4884-9a83-39b56f84ae0d" RequestNavigate="Hyperlink_OnRequestNavigate"> CrunchUtils</Hyperlink>
+                    </TextBlock>
+                    <TextBlock Text="The !giveitem command can be used to give in-game rewards directly to players inventory when claimed."/>
+                    <Border BorderThickness="2" Background="Red" CornerRadius="10">
+                        <Label HorizontalAlignment="Center" FontWeight="Bold" Content="IMPORTANT -->  Never forget to use the Save Config button after making any changes!!!" Margin="0,10,0,10"/>
+                    </Border>
+                </StackPanel> 
+            </TabItem>
+        </TabControl>
 
         <Button Grid.Column="2" Grid.Row="4" Content="Save Config" Margin="5" Click="SaveButton_OnClick"></Button>
     </Grid>

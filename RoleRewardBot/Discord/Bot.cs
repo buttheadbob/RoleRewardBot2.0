@@ -12,7 +12,7 @@ using RoleRewardBot.Utils;
 
 namespace RoleRewardBot.Discord
 {
-    public sealed class Bot
+    public sealed class Bot : IDisposable
     {
         public DiscordClient Client { get; private set; }
         public InteractivityExtension Interactivity { get; private set; }
@@ -26,6 +26,7 @@ namespace RoleRewardBot.Discord
         public SendDM DMSender = new SendDM();
         public IDManager ID_Manager = new IDManager();
         public PayManager Pay_Manager = new PayManager();
+        public bool IsConnected { get; set; }
 
         public bool IsBotOnline()
         {
@@ -84,6 +85,13 @@ namespace RoleRewardBot.Discord
         {
             Log.Error(args.Exception, "Command Errored!");
             return Task.CompletedTask; 
+        }
+
+        public void Dispose()
+        {
+            Client?.Dispose();
+            Interactivity?.Dispose();
+            Commands?.Dispose();
         }
     }
 }

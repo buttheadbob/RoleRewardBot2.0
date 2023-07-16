@@ -250,6 +250,9 @@
     <Compile Include="RoleRewardBot\UI\RoleRewardBotControl.xaml.cs">
       <DependentUpon>RoleRewardBotControl.xaml</DependentUpon>
     </Compile>
+    <Compile Include="RoleRewardBot\UI\SendDiscordPM.xaml.cs">
+      <DependentUpon>SendDiscordPM.xaml</DependentUpon>
+    </Compile>
     <Compile Include="RoleRewardBot\Utils\IDManager.cs" />
     <Compile Include="RoleRewardBot\Utils\PayManager.cs" />
     <Compile Include="RoleRewardBot\Utils\TorchCommandManager.cs" />
@@ -278,6 +281,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="RoleRewardBot\UI\SendDiscordPM.xaml" />
   </ItemGroup>
   <Target Name="Zip" BeforeTargets="AfterBuild">
     <MakeDir Directories="$(SolutionDir)\Build\" />

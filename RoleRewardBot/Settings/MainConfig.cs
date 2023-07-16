@@ -25,6 +25,7 @@ namespace RoleRewardBot
         private MyList<LinkRequest> m_linkRequests = new MyList<LinkRequest>();
         public MyList<LinkRequest> LinkRequests { get => m_linkRequests; set => SetValue(ref m_linkRequests, value); }
         
-        
+        private bool m_enabledWhenOnline;
+        public bool EnabledWhenOnline { get => m_enabledWhenOnline; set => SetValue(ref m_enabledWhenOnline, value); }
     }
 }

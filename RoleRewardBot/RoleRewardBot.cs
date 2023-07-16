@@ -98,5 +98,11 @@ namespace RoleRewardBot
             }
             return Task.CompletedTask;
         }
+
+        public override void Dispose()
+        {
+            DiscordBot.Dispose();
+            base.Dispose();
+        }
     }
 }

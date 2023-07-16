@@ -1,0 +1,22 @@
+﻿<Window x:Class="RoleRewardBot.UI.SendDiscordPM"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:local="clr-namespace:RoleRewardBot.UI"
+        mc:Ignorable="d"
+        Background="DarkSlateGray"
+        WindowStartupLocation="CenterOwner"
+        Title="SendDiscordPM" Height="260" Width="330">
+    <Grid>
+        <Border BorderBrush="Blue" BorderThickness="5,0,5,0" CornerRadius="10" Width="300">
+            <StackPanel>
+                <TextBlock Text="Send Direct Message" Margin="10" FontSize="25" FontWeight="Heavy" Foreground="AntiqueWhite" TextAlignment="Center"/>
+                <TextBlock Name="UserName" Background="Black" Foreground="LawnGreen" HorizontalAlignment="Center"/>
+                <TextBox Name="Message" Background="Black" Foreground="LawnGreen" TextWrapping="Wrap" Height="100"/>
+                <Button Name="Send" Content="Send Message" Click="Send_OnClick"/>
+                <Button Name="Cancel" Content="Cancel" Click="Cancel_OnClick"/>
+            </StackPanel>
+        </Border>
+    </Grid>
+</Window>
