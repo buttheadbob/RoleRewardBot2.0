@@ -1,7 +1,11 @@
 ﻿using NLog;
 using System;
 using System.IO;
+using System.Threading.Tasks;
 using System.Windows.Controls;
+using System.Windows.Threading;
+using RoleRewardBot.Discord;
+using RoleRewardBot.Utils;
 using Torch;
 using Torch.API;
 using Torch.API.Managers;
@@ -15,19 +19,22 @@ namespace RoleRewardBot
     {
 
         public static readonly Logger Log = LogManager.GetCurrentClassLogger();
-
-        private static readonly string CONFIG_FILE_NAME = "RoleRewardBotConfig.cfg";
-
+        private static readonly string CONFIG_FILE_NAME = "MainConfig.cfg";
         private RoleRewardBotControl _control;
         public UserControl GetControl() => _control ?? (_control = new RoleRewardBotControl(this));
-
-        private Persistent<RoleRewardBotConfig> _config;
-        public RoleRewardBotConfig Config => _config?.Data;
-
+        private Persistent<MainConfig> _config;
+        public MainConfig Config => _config?.Data;
+        public static RoleRewardBot Instance;
+        public Dispatcher MainDispatcher;
+        public bool WorldOnline;
+        public static readonly TorchCommandManager CommandsManager = new TorchCommandManager();
+        public static Bot DiscordBot = new Bot();
+        
         public override void Init(ITorchBase torch)
         {
             base.Init(torch);
-
+            Instance = this;
+            MainDispatcher = Dispatcher.CurrentDispatcher;
             SetupConfig();
 
             var sessionManager = Torch.Managers.GetManager<TorchSessionManager>();
@@ -41,29 +48,27 @@ namespace RoleRewardBot
 
         private void SessionChanged(ITorchSession session, TorchSessionState state)
         {
-
             switch (state)
             {
-
                 case TorchSessionState.Loaded:
                     Log.Info("Session Loaded!");
+                    WorldOnline = true;
                     break;
 
                 case TorchSessionState.Unloading:
                     Log.Info("Session Unloading!");
+                    WorldOnline = false;
                     break;
             }
         }
 
         private void SetupConfig()
         {
-
             var configFile = Path.Combine(StoragePath, CONFIG_FILE_NAME);
 
             try
             {
-
-                _config = Persistent<RoleRewardBotConfig>.Load(configFile);
+                _config = Persistent<MainConfig>.Load(configFile);
 
             }
             catch (Exception e)
@@ -73,15 +78,14 @@ namespace RoleRewardBot
 
             if (_config?.Data == null)
             {
-
                 Log.Info("Create Default Config, because none was found!");
 
-                _config = new Persistent<RoleRewardBotConfig>(configFile, new RoleRewardBotConfig());
+                _config = new Persistent<MainConfig>(configFile, new MainConfig());
                 _config.Save();
             }
         }
 
-        public void Save()
+        public Task Save()
         {
             try
             {
@@ -92,6 +96,7 @@ namespace RoleRewardBot
             {
                 Log.Warn(e, "Configuration failed to save");
             }
+            return Task.CompletedTask;
         }
     }
 }
