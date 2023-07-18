@@ -45,8 +45,8 @@ namespace RoleRewardBot
         
         private async void ForceBotOnline_OnClick(object sender, RoutedEventArgs e)
         {
-            if (!DiscordBot.IsBotOnline()) return;
-            await DiscordBot.Client.ConnectAsync();
+            if (DiscordBot.IsBotOnline()) return;
+            await DiscordBot.ConnectAsync();
         }
 
         private async void ForceBotOffline_OnClick(object sender, RoutedEventArgs e)

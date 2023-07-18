@@ -24,7 +24,7 @@ namespace RoleRewardBot.Objects
         {
             lock (_lock)
             {
-                m_dispatcher.Invoke(() => Items.Add(item));
+                m_dispatcher.InvokeAsync(() => Items.Add(item));
             }
         }
         
@@ -32,7 +32,7 @@ namespace RoleRewardBot.Objects
         {
             lock (_lock)
             {
-                m_dispatcher.Invoke(() => Items.Remove(item));
+                m_dispatcher.InvokeAsync(() => Items.Remove(item));
             }
         }
         
@@ -40,7 +40,7 @@ namespace RoleRewardBot.Objects
         {
             lock (_lock)
             {
-                m_dispatcher.Invoke(() => Items.RemoveAt(index));
+                m_dispatcher.InvokeAsync(() => Items.RemoveAt(index));
             }
         }
         
@@ -48,7 +48,7 @@ namespace RoleRewardBot.Objects
         {
             lock (_lock)
             {
-                m_dispatcher.Invoke(() => Items.Clear());
+                m_dispatcher.InvokeAsync(() => Items.Clear());
             }
         }
         
@@ -56,7 +56,7 @@ namespace RoleRewardBot.Objects
         {
             lock (_lock)
             {
-                m_dispatcher.Invoke(() =>
+                m_dispatcher.InvokeAsync(() =>
                 {
                     m_notificationSuspended = true;
                     foreach (var item in items)

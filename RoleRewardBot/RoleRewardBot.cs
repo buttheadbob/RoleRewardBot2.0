@@ -30,20 +30,20 @@ namespace RoleRewardBot
         public static readonly TorchCommandManager CommandsManager = new TorchCommandManager();
         public static Bot DiscordBot = new Bot();
         
-        public override void Init(ITorchBase torch)
+        
+        public override async void Init(ITorchBase torch)
         {
             base.Init(torch);
             Instance = this;
             MainDispatcher = Dispatcher.CurrentDispatcher;
             SetupConfig();
-
             var sessionManager = Torch.Managers.GetManager<TorchSessionManager>();
             if (sessionManager != null)
                 sessionManager.SessionStateChanged += SessionChanged;
             else
                 Log.Warn("No session manager loaded!");
 
-            Save();
+            await Save();
         }
 
         private void SessionChanged(ITorchSession session, TorchSessionState state)

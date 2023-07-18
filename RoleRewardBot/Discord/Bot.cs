@@ -6,35 +6,63 @@ using DSharpPlus.Entities;
 using DSharpPlus.Interactivity;
 using DSharpPlus.Interactivity.Extensions;
 using DSharpPlus.SlashCommands;
+using Microsoft.Extensions.Logging.Abstractions;
 using NLog;
 using RoleRewardBot.Discord.Utils;
 using RoleRewardBot.Utils;
 
 namespace RoleRewardBot.Discord
 {
-    public sealed class Bot : IDisposable
+    public sealed class Bot
     {
         public DiscordClient Client { get; private set; }
         public InteractivityExtension Interactivity { get; private set; }
-        public CommandsNextExtension Commands { get; private set; }
-        public Logger Log = LogManager.GetLogger("Rewards Discord Bot");
+        private CommandsNextExtension Commands { get; set; }
+        private Logger Log = LogManager.GetLogger("Rewards Discord Bot");
         public enum BotStatus { Online, Offline, Connecting, Disconnecting }
         public BotStatus botStatus = BotStatus.Offline;
         private Bot_Subscriptions m_subscriptions = new Bot_Subscriptions();
         public ServerData ServerData = new ServerData();
         public DiscordUser BotUser { get; set; }
-        public SendDM DMSender = new SendDM();
-        public IDManager ID_Manager = new IDManager();
-        public PayManager Pay_Manager = new PayManager();
+        public readonly SendDM DMSender = new SendDM();
+        public readonly IDManager ID_Manager = new IDManager();
+        public readonly PayManager Pay_Manager = new PayManager();
         public bool IsConnected { get; set; }
+        private bool Inited; 
 
         public bool IsBotOnline()
         {
             return botStatus == BotStatus.Online;
         }
 
-        public async Task RunAsync()
+        public async Task ConnectAsync()
         {
+            if (string.IsNullOrWhiteSpace(RoleRewardBot.Instance.Config.Token))
+            {
+                Log.Error("Invalid Bot Token, please set the token in the settings tab.");
+                return;
+            }
+
+            if (!Inited)
+            {
+                if (!await InitAsync()) return; // Init failed, dont proceed.
+                Log.Info("Valid Token, Connecting...");
+                await Client.ConnectAsync();
+                return;
+            }
+            Log.Info("Init already completed, Connecting...");
+            await Client.ConnectAsync(); // Already Init'd, just connect.
+        }
+
+        private Task<bool> InitAsync()
+        {
+            if (string.IsNullOrWhiteSpace(RoleRewardBot.Instance.Config.Token))
+            {
+                Log.Error("Invalid Bot Token, please set the token in the settings tab.");
+                return Task.FromResult(false);
+            }
+            
+            Log.Info("Valid Token, Initing...");
             // Setup the client configuration
             DiscordConfiguration d_config = new DiscordConfiguration()
             {
@@ -43,6 +71,7 @@ namespace RoleRewardBot.Discord
                 AutoReconnect = true,
                 Intents = DiscordIntents.All,
                 HttpTimeout = TimeSpan.FromSeconds(30),
+                LoggerFactory = new DSharpPlusNLogAdapter( LogLevel.Trace),
             };
 
             Client = new DiscordClient(d_config);
@@ -74,11 +103,8 @@ namespace RoleRewardBot.Discord
             Commands.CommandErrored += Commands_CommandErrored;
             
             Client.GuildDownloadCompleted += m_subscriptions.Client_GuildDownloadCompleted;
-
-            if (RoleRewardBot.Instance.Config.EnabledOnAppStart)
-                await Client.ConnectAsync();
-            
-            await Task.Delay(-1);
+            Inited = true;
+            return Task.FromResult(true);
         }
 
         private Task Commands_CommandErrored(CommandsNextExtension sender, CommandErrorEventArgs args)

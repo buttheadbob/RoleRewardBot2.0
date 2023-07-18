@@ -23,7 +23,7 @@
         <Label Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="2" Content="Rewards Bot" FontSize="40" FontWeight="Heavy" Foreground="#FF27E915"/>
 
         <TabControl Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2">
-            <TabItem Header="Settings" >
+            <TabItem Header="Settings" IsSelected="True">
                 <Grid Background="LightSlateGray">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="10" />
@@ -46,16 +46,16 @@
                     <StackPanel Grid.Column="1" Grid.Row="5" UseLayoutRounding="True" Background="Cornsilk">
                         <CheckBox Name="EnableOnlineCheckBox" IsChecked="{Binding EnabledOnline }" Content="Run bot when server goes online." Click="EnableOnlineCheckBox_OnClick"/>
                         <CheckBox Name="EnableOfflineCheckBox" IsChecked="{Binding EnabledOffline }" Content="Run bot before server starts." Click="EnableOfflineCheckBox_OnClick"/>
-                        <CheckBox Name="RemoveBannedUsersFromRegistryCheckBox" IsChecked="{Binding RemoveBannedUsersFromRegistry }" Content="Removed users from registry when banned." ToolTip="This will result in removing players from short term bans also." Click="RemoveBannedUsersFromRegistryCheckBox_OnClick"/>
+                        <CheckBox Name="RemoveBannedUsersFromRegistryCheckBox" IsChecked="{Binding RemoveOnBannedUser }" Content="Removed users from registry when banned." ToolTip="This will result in removing players from short term bans also." Click="RemoveBannedUsersFromRegistryCheckBox_OnClick"/>
                         
                         <Label Content="Bot Status Message" Margin="0,5,0,0"/>
-                        <TextBox Text="{Binding BotStatusMessage}" ToolTip="Bot status message.  Default --> Rewarding..." Margin="2,0,2,0"/>
+                        <TextBox Text="{Binding StatusMessage}" ToolTip="Bot status message.  Default --> Rewarding..." Margin="2,0,2,0"/>
                         
                         <Label Content="Bot Token" Margin="0,5,0,0"/>
-                        <TextBox Text="{Binding BotKey}" ToolTip="Bot KEY/TOKEN" Margin="2,0,2,0"/>
+                        <TextBox Text="{Binding Token}" ToolTip="Bot KEY/TOKEN" Margin="2,0,2,0"/>
                         
                         <Label Content="Bot Name" Margin="0,5,0,0"/>
-                        <TextBox Text="{Binding BotName}" ToolTip="Bot Name to use on Discord." Margin="2,0,2,0"/>
+                        <TextBox Text="{Binding DiscordBotName}" ToolTip="Bot Name to use on Discord." Margin="2,0,2,0"/>
                         
                         <Button Content="Save Config" Margin="5" Click="SaveButton_OnClick"/>
                     </StackPanel>
@@ -244,7 +244,7 @@
                 </Grid>
             </TabItem>
             
-            <TabItem Header="Discord" IsSelected="True">
+            <TabItem Header="Discord" >
                 <Grid Background = "LightSlateGray">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="10"/>
