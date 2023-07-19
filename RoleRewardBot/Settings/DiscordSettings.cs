@@ -25,9 +25,10 @@ namespace RoleRewardBot
         private string m_discordBotEmbedAuthorAvatarURL = "https://cdn.discordapp.com/avatars/0/0.png";
         public string DiscordBotEmbedAuthorAvatarURL { get => m_discordBotEmbedAuthorAvatarURL; set => SetValue(ref m_discordBotEmbedAuthorAvatarURL, value); }
 
-        private string m_statusMessage = "Rewarding Space Engieers!!";
+        private string m_statusMessage = "Rewarding Space Engineers!!";
         public string StatusMessage { get => m_statusMessage; set => SetValue(ref m_statusMessage, value); }
 
-        
+        private string m_BotStatus;
+        public string BotStatus { get => m_BotStatus; set => SetValue(ref m_BotStatus, value); }
     }
 }

@@ -35,7 +35,6 @@ namespace RoleRewardBot
         {
             base.Init(torch);
             Instance = this;
-            MainDispatcher = Dispatcher.CurrentDispatcher;
             SetupConfig();
             var sessionManager = Torch.Managers.GetManager<TorchSessionManager>();
             if (sessionManager != null)
@@ -44,8 +43,13 @@ namespace RoleRewardBot
                 Log.Warn("No session manager loaded!");
 
             await Save();
-        }
+            
+            Config.BotStatus = "Offline";
 
+            if (Config.EnabledOnAppStart)
+                await DiscordBot.ConnectAsync();
+        }
+        
         private void SessionChanged(ITorchSession session, TorchSessionState state)
         {
             switch (state)

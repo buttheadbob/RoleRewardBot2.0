@@ -1,8 +1,11 @@
-﻿using System.Collections.Concurrent;
+﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
+using System.ComponentModel;
 using System.Windows.Threading;
+using NLog;
 
 namespace RoleRewardBot.Objects
 {
@@ -11,6 +14,7 @@ namespace RoleRewardBot.Objects
         private Dispatcher m_dispatcher => RoleRewardBot.Instance.MainDispatcher;
         private readonly object _lock = new object();
         private bool m_notificationSuspended = false;
+        private Logger Log = LogManager.GetCurrentClassLogger();
 
         protected override void OnCollectionChanged(NotifyCollectionChangedEventArgs e)
         {
@@ -19,12 +23,23 @@ namespace RoleRewardBot.Objects
                 base.OnCollectionChanged(e);
             }
         }
-        
+
+        protected override void OnPropertyChanged(PropertyChangedEventArgs e)
+        {
+            if (!m_notificationSuspended)
+                base.OnPropertyChanged(e);
+        }
+
         public new void Add(T item)
         {
             lock (_lock)
             {
-                m_dispatcher.InvokeAsync(() => Items.Add(item));
+                m_dispatcher.Invoke(() =>
+                {
+                    Items.Add(item);
+                    OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
+                });
+                
             }
         }
         
@@ -32,7 +47,14 @@ namespace RoleRewardBot.Objects
         {
             lock (_lock)
             {
-                m_dispatcher.InvokeAsync(() => Items.Remove(item));
+                m_dispatcher.Invoke(() =>
+                {
+                    var result = Items.Remove(item);
+                    if (result)
+                        OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
+                    return result;
+
+                });
             }
         }
         
@@ -40,7 +62,12 @@ namespace RoleRewardBot.Objects
         {
             lock (_lock)
             {
-                m_dispatcher.InvokeAsync(() => Items.RemoveAt(index));
+                m_dispatcher.Invoke(() =>
+                {
+                    Items.RemoveAt(index);
+                    OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
+                });
+                
             }
         }
         
@@ -48,24 +75,37 @@ namespace RoleRewardBot.Objects
         {
             lock (_lock)
             {
-                m_dispatcher.InvokeAsync(() => Items.Clear());
+                m_dispatcher.Invoke(() =>
+                {
+                    Items.Clear();
+                    OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
+                });
             }
         }
         
         public void AddRange(IEnumerable<T> items)
         {
-            lock (_lock)
+            try
             {
-                m_dispatcher.InvokeAsync(() =>
+                lock (_lock)
                 {
-                    m_notificationSuspended = true;
-                    foreach (var item in items)
+                    m_dispatcher.Invoke(() =>
                     {
-                        Items.Add(item);
-                    }
-                    m_notificationSuspended = false;
-                    OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
-                });
+                        m_notificationSuspended = true;
+
+                        foreach (var item in items)
+                        {
+                            Items.Add(item);
+                        }
+
+                        m_notificationSuspended = false;
+                        OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Error("Error adding range: " + ex);
             }
         }
     }

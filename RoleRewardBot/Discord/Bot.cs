@@ -46,7 +46,8 @@ namespace RoleRewardBot.Discord
             if (!Inited)
             {
                 if (!await InitAsync()) return; // Init failed, dont proceed.
-                Log.Info("Valid Token, Connecting...");
+                RoleRewardBot.Instance.Config.BotStatus = "Connecting...";
+                Log.Info("Connecting...");
                 await Client.ConnectAsync();
                 return;
             }
@@ -71,6 +72,7 @@ namespace RoleRewardBot.Discord
                 AutoReconnect = true,
                 Intents = DiscordIntents.All,
                 HttpTimeout = TimeSpan.FromSeconds(30),
+                MinimumLogLevel = Microsoft.Extensions.Logging.LogLevel.Trace,
                 LoggerFactory = new DSharpPlusNLogAdapter( LogLevel.Trace),
             };
 
@@ -102,6 +104,7 @@ namespace RoleRewardBot.Discord
             
             Commands.CommandErrored += Commands_CommandErrored;
             
+            Client.Ready += m_subscriptions.Client_Ready;
             Client.GuildDownloadCompleted += m_subscriptions.Client_GuildDownloadCompleted;
             Inited = true;
             return Task.FromResult(true);

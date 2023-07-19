@@ -44,8 +44,8 @@
                     </Grid.RowDefinitions>
                     
                     <StackPanel Grid.Column="1" Grid.Row="5" UseLayoutRounding="True" Background="Cornsilk">
-                        <CheckBox Name="EnableOnlineCheckBox" IsChecked="{Binding EnabledOnline }" Content="Run bot when server goes online." Click="EnableOnlineCheckBox_OnClick"/>
-                        <CheckBox Name="EnableOfflineCheckBox" IsChecked="{Binding EnabledOffline }" Content="Run bot before server starts." Click="EnableOfflineCheckBox_OnClick"/>
+                        <CheckBox Name="EnableOnlineCheckBox" IsChecked="{Binding EnabledOnGameStart }" Content="Run bot when server goes online." Click="EnableOnlineCheckBox_OnClick"/>
+                        <CheckBox Name="EnableOfflineCheckBox" IsChecked="{Binding EnabledOnAppStart }" Content="Run bot before server starts." Click="EnableOfflineCheckBox_OnClick"/>
                         <CheckBox Name="RemoveBannedUsersFromRegistryCheckBox" IsChecked="{Binding RemoveOnBannedUser }" Content="Removed users from registry when banned." ToolTip="This will result in removing players from short term bans also." Click="RemoveBannedUsersFromRegistryCheckBox_OnClick"/>
                         
                         <Label Content="Bot Status Message" Margin="0,5,0,0"/>

@@ -29,6 +29,7 @@ namespace RoleRewardBot
         private RoleRewardBotControl()
         {
             InitializeComponent();
+            Instance.MainDispatcher = FilteredCount.Dispatcher;
             DataContext = Config;
             DiscordMembersGrid.DataContext = this;
             RegisteredMembersGrid.DataContext = this;
@@ -45,14 +46,23 @@ namespace RoleRewardBot
         
         private async void ForceBotOnline_OnClick(object sender, RoutedEventArgs e)
         {
-            if (DiscordBot.IsBotOnline()) return;
+            if (DiscordBot.IsBotOnline())
+            {
+                Log.Warn("Unable to connect to Discord. Bot is already online.");
+                return;
+            }
+            
+            Instance.Config.BotStatus = "Connecting...";
             await DiscordBot.ConnectAsync();
+            
         }
 
         private async void ForceBotOffline_OnClick(object sender, RoutedEventArgs e)
         {
-            if (DiscordBot.IsBotOnline()) return;
+            if (!DiscordBot.IsBotOnline()) return;
+            Instance.Config.BotStatus = "Disconnecting...";
             await DiscordBot.Client.DisconnectAsync();
+            Instance.Config.BotStatus = "Offline";
         }
 
         private void RegisteredUsersOnCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
@@ -64,9 +74,14 @@ namespace RoleRewardBot
 
         private void DiscordMembersOnCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
+            DiscordMembersGrid.ItemsSource = null;
             FilteredDiscordMembers.Clear();
             FilteredDiscordMembers.AddRange(DiscordBot.ServerData.DiscordMembers);
-            FilteredCount.Dispatcher.Invoke(() => { FilteredCount.Text = $"Filtered: {FilteredDiscordMembers.Count} / {DiscordBot.ServerData.DiscordMembers.Count}"; });
+            FilteredCount.Dispatcher.InvokeAsync(() =>
+            {
+                FilteredCount.Text = $"Showing: {FilteredDiscordMembers.Count} of {DiscordBot.ServerData.DiscordMembers.Count}";
+            });
+            DiscordMembersGrid.ItemsSource = FilteredDiscordMembers;
         }
 
         public RoleRewardBotControl(RoleRewardBot plugin) : this()
@@ -104,6 +119,16 @@ namespace RoleRewardBot
             TextBox tempTextBox = (TextBox)sender;
             if (tempTextBox is null)
                 return;
+
+            if (string.IsNullOrWhiteSpace(tempTextBox.Text))
+            {
+                DiscordMembersGrid.ItemsSource = null;
+                FilteredDiscordMembers.Clear();
+                FilteredDiscordMembers.AddRange(DiscordBot.ServerData.DiscordMembers);
+                DiscordMembersGrid.ItemsSource = FilteredDiscordMembers;
+                FilteredCount.Text = $"Showing: {FilteredDiscordMembers.Count} of {DiscordBot.ServerData.DiscordMembers.Count}";
+                return;
+            }
             
             DiscordMembersGrid.ItemsSource = null;
             FilteredDiscordMembers.Clear();
@@ -128,9 +153,9 @@ namespace RoleRewardBot
                     continue;
                 }
             }
-
-            FilteredCount.Text = FilteredDiscordMembers.Count + " / " + DiscordBot.ServerData.DiscordMembers.Count;
+            
             DiscordMembersGrid.ItemsSource = FilteredDiscordMembers;
+            FilteredCount.Text = $"Showing: {FilteredDiscordMembers.Count} of {DiscordBot.ServerData.DiscordMembers.Count}";
         }
         
         private void FilterRegisteredMembers_OnKeyUp(object sender, KeyEventArgs e)
@@ -138,6 +163,16 @@ namespace RoleRewardBot
             TextBox tempTextBox = (TextBox)sender;
             if (tempTextBox is null)
                 return;
+            
+            if (string.IsNullOrWhiteSpace(tempTextBox.Text))
+            {
+                RegisteredMembersGrid.ItemsSource = null;
+                FilteredRegisteredUsers.Clear();
+                FilteredRegisteredUsers.AddRange(Config.RegisteredUsers);
+                RegisteredMembersGrid.ItemsSource = FilteredDiscordMembers;
+                FilteredRegisteredCount.Text = $"Showing: {FilteredDiscordMembers.Count} of {DiscordBot.ServerData.DiscordMembers.Count}";
+                return;
+            }
             
             RegisteredMembersGrid.ItemsSource = null;
             FilteredRegisteredUsers.Clear();
@@ -170,7 +205,7 @@ namespace RoleRewardBot
                 }
             }
 
-            FilteredCount.Text = FilteredRegisteredUsers.Count + " / " + Instance.Config.RegisteredUsers.Count;
+            FilteredRegisteredCount.Text = $"Showing: {FilteredDiscordMembers.Count} of {DiscordBot.ServerData.DiscordMembers.Count}";
             RegisteredMembersGrid.ItemsSource = FilteredRegisteredUsers;
         }
         
@@ -246,7 +281,7 @@ namespace RoleRewardBot
                 case null:
                     return;
                 default:
-                    Instance.Config.EnabledWhenOnline = cb.IsChecked.Value;
+                    Instance.Config.EnabledOnGameStart = cb.IsChecked.Value;
                     break;
             }
         }
@@ -259,7 +294,7 @@ namespace RoleRewardBot
                 case null:
                     return;
                 default:
-                    Instance.Config.EnabledWhenOnline = cb.IsChecked.Value;
+                    Instance.Config.EnabledOnAppStart = cb.IsChecked.Value;
                     break;
             }
         }

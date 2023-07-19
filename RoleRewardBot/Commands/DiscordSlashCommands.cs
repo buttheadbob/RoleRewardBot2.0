@@ -62,7 +62,7 @@ namespace RoleRewardBot
             await ctx.CreateResponseAsync($"Your link code is {code}. Go into the game and in type the following in chat -> !RewardBot Link {code}", ephemeral:true);
         }
         
-        [SlashCommand("unlink", "Unlink your Discord account from your Steam account.  You will no longer receive rewards from the bot!")]
+        [SlashCommand("unlink", "Unlink your Discord account from your Steam account.")]
         public async Task Unlink(InteractionContext ctx)
         {
             for (int index = Config.RegisteredUsers.Count - 1; index >= 0; index--)

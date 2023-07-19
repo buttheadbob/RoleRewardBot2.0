@@ -1,5 +1,4 @@
 ﻿using System;
-using DSharpPlus;
 using Microsoft.Extensions.Logging;
 using NLog;
 using ILogger = Microsoft.Extensions.Logging.ILogger;
@@ -46,14 +45,16 @@ namespace RoleRewardBot.Utils
         {
             if (IsEnabled(logLevel))
             {
-                var message = formatter(state, exception);
+                string message = formatter(state, exception);
+                if (exception != null)
+                    message = "\n" + exception;
                 _logger.Log(ConvertLogLevel(logLevel), message);
             }
         }
 
         public bool IsEnabled(Microsoft.Extensions.Logging.LogLevel logLevel)
         {
-            return true;
+            return _logger.IsEnabled(ConvertLogLevel(logLevel));
         }
 
         public IDisposable BeginScope<TState>(TState state)
