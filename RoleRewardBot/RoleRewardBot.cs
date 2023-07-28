@@ -4,6 +4,7 @@ using System.IO;
 using System.Threading.Tasks;
 using System.Windows.Controls;
 using System.Windows.Threading;
+using DSharpPlus.Entities;
 using RoleRewardBot.Discord;
 using RoleRewardBot.Utils;
 using Torch;
@@ -49,18 +50,22 @@ namespace RoleRewardBot
                 await DiscordBot.ConnectAsync();
         }
         
-        private void SessionChanged(ITorchSession session, TorchSessionState state)
+        private async void SessionChanged(ITorchSession session, TorchSessionState state)
         {
             switch (state)
             {
                 case TorchSessionState.Loaded:
                     Log.Info("Session Loaded!");
                     WorldOnline = true;
+                    if (DiscordBot.IsConnected)
+                        await DiscordBot.Client.UpdateStatusAsync(new DiscordActivity(Instance.Config.StatusMessage, ActivityType.Playing), UserStatus.Online);
                     break;
 
                 case TorchSessionState.Unloading:
                     Log.Info("Session Unloading!");
                     WorldOnline = false;
+                    if (DiscordBot.IsConnected)
+                        await DiscordBot.Client.UpdateStatusAsync(new DiscordActivity("for the server to come online...", ActivityType.Watching), UserStatus.DoNotDisturb);
                     break;
             }
         }

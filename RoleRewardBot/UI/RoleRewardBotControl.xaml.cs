@@ -47,7 +47,7 @@ namespace RoleRewardBot
         
         private async void ForceBotOnline_OnClick(object sender, RoutedEventArgs e)
         {
-            if (DiscordBot.IsBotOnline())
+            if (DiscordBot.IsConnected)
             {
                 Log.Warn("Unable to connect to Discord. Bot is already online.");
                 return;
@@ -60,7 +60,7 @@ namespace RoleRewardBot
 
         private async void ForceBotOffline_OnClick(object sender, RoutedEventArgs e)
         {
-            if (!DiscordBot.IsBotOnline()) return;
+            if (!DiscordBot.IsConnected) return;
             Instance.Config.BotStatus = "Disconnecting...";
             await DiscordBot.Client.DisconnectAsync();
             Instance.Config.BotStatus = "Offline";
@@ -98,7 +98,7 @@ namespace RoleRewardBot
         
         private async void ForceBoosterRewardPayout_OnClick(object sender, RoutedEventArgs e)
         {
-            if (!DiscordBot.IsBotOnline())
+            if (!DiscordBot.IsConnected)
             {
                 MessageBox.Show("Bot is not online.  Please start the bot and try again.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
@@ -258,7 +258,7 @@ namespace RoleRewardBot
             if ( MessageBox.Show($"Are you sure you want to run the reward command [{Instance.Config.Rewards[ForceSelectedPayoutToAll.SelectedIndex].Name}] on ALL players, regardless if they have already received their rewards or not?  This will not count towards their scheduled reward payments.", "CAUTION!!!", MessageBoxButton.OKCancel, MessageBoxImage.Warning) == MessageBoxResult.Cancel) 
                 return;
 
-            if (!DiscordBot.IsBotOnline())
+            if (!DiscordBot.IsConnected)
             {
                 MessageBox.Show("Bot is not online.  Please start the bot and try again.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;

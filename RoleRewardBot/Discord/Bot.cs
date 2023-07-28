@@ -6,7 +6,6 @@ using DSharpPlus.Entities;
 using DSharpPlus.Interactivity;
 using DSharpPlus.Interactivity.Extensions;
 using DSharpPlus.SlashCommands;
-using Microsoft.Extensions.Logging.Abstractions;
 using NLog;
 using RoleRewardBot.Discord.Utils;
 using RoleRewardBot.Utils;
@@ -19,8 +18,6 @@ namespace RoleRewardBot.Discord
         public InteractivityExtension Interactivity { get; private set; }
         private CommandsNextExtension Commands { get; set; }
         private Logger Log = LogManager.GetLogger("Rewards Discord Bot");
-        public enum BotStatus { Online, Offline, Connecting, Disconnecting }
-        public BotStatus botStatus = BotStatus.Offline;
         private Bot_Subscriptions m_subscriptions = new Bot_Subscriptions();
         public ServerData ServerData = new ServerData();
         public DiscordUser BotUser { get; set; }
@@ -29,11 +26,6 @@ namespace RoleRewardBot.Discord
         public readonly PayManager Pay_Manager = new PayManager();
         public bool IsConnected { get; set; }
         private bool Inited; 
-
-        public bool IsBotOnline()
-        {
-            return botStatus == BotStatus.Online;
-        }
 
         public async Task ConnectAsync()
         {
@@ -51,7 +43,9 @@ namespace RoleRewardBot.Discord
                 await Client.ConnectAsync();
                 return;
             }
-            Log.Info("Init already completed, Connecting...");
+            
+            RoleRewardBot.Instance.Config.BotStatus = "Connecting...";
+            Log.Info("Connecting...");
             await Client.ConnectAsync(); // Already Init'd, just connect.
         }
 

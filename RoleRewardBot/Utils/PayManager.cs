@@ -37,7 +37,7 @@ namespace RoleRewardBot.Utils
             }
 
             // Bot must be online for up to date list of users and their roles!
-            if (!RoleRewardBot.DiscordBot.IsBotOnline()) return;
+            if (!RoleRewardBot.DiscordBot.IsConnected) return;
             
             // Server must be online so players who get notified have a world they can join to claim!!
             if (!RoleRewardBot.Instance.WorldOnline) return;
@@ -58,7 +58,7 @@ namespace RoleRewardBot.Utils
         /// <param name="payAll">False: Only qualifying registered users will receive rewards.  True: ALL registered users will receive rewards.</param>
         public async Task Payout(int rewardID = 0, bool payAll = false)
         {
-            if (!RoleRewardBot.DiscordBot.IsBotOnline())
+            if (!RoleRewardBot.DiscordBot.IsConnected)
             {
                 Log.Warn("Unable to process rewards while the Discord bot is offline.");
                 return;
@@ -157,7 +157,7 @@ namespace RoleRewardBot.Utils
                             }
                             else
                             {
-                                if (!RoleRewardBot.DiscordBot.IsBotOnline()) continue;
+                                if (!RoleRewardBot.DiscordBot.IsConnected) continue;
                                 // Announce to player on discord.
                                 DiscordMember user = await RoleRewardBot.DiscordBot.ServerData.guild.GetMemberAsync(registeredUser.DiscordId);
                                 try
@@ -199,7 +199,7 @@ namespace RoleRewardBot.Utils
                 return;
             }
             
-            if (!RoleRewardBot.DiscordBot.IsBotOnline())
+            if (!RoleRewardBot.DiscordBot.IsConnected)
             {
                 Log.Warn("Unable to process rewards while the Discord bot is offline.");
                 return;
@@ -265,7 +265,7 @@ namespace RoleRewardBot.Utils
                         }
                         else
                         {
-                            if (!RoleRewardBot.DiscordBot.IsBotOnline()) continue;
+                            if (!RoleRewardBot.DiscordBot.IsConnected) continue;
                             // Announce to player on discord.
                             DiscordMember user = await RoleRewardBot.DiscordBot.ServerData.guild.GetMemberAsync(registeredUser.DiscordId);
                             try

@@ -1,11 +1,9 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using NLog;
-using RoleRewardBot.Objects;
 using static RoleRewardBot.RoleRewardBot;
 
 namespace RoleRewardBot.Discord
@@ -27,7 +25,16 @@ namespace RoleRewardBot.Discord
             }
             
             // Get bot user
-            DiscordBot.BotUser = await DiscordBot.Client.GetUserAsync(DiscordBot.Client.CurrentUser.Id);
+            DiscordBot.BotUser = await DiscordBot.Client.GetUserAsync(DiscordBot.Client.CurrentUser.Id, true);
+            
+            // Set Bot Name, Status
+            if (Instance.Config.DiscordBotName != DiscordBot.BotUser.Username)
+                await DiscordBot.Client.UpdateCurrentUserAsync(Instance.Config.DiscordBotName);
+            
+            if (Instance.WorldOnline)
+                await DiscordBot.Client.UpdateStatusAsync(new DiscordActivity(Instance.Config.StatusMessage, ActivityType.Playing), UserStatus.Online);
+            else
+                await DiscordBot.Client.UpdateStatusAsync(new DiscordActivity("for the server to come online...", ActivityType.Watching), UserStatus.DoNotDisturb);
             
             // Pointer to guild data, this is not a sharded bot!
             m_bot.ServerData.guild = m_guilds[0];
@@ -63,25 +70,16 @@ namespace RoleRewardBot.Discord
 
         private Task Client_SocketClosed(DiscordClient sender, SocketCloseEventArgs args)
         {
-            DiscordBot.botStatus = Bot.BotStatus.Offline;
             DiscordBot.IsConnected = false;
             return Task.CompletedTask;
         }
 
-        public async Task Client_Ready(DiscordClient sender, ReadyEventArgs args)
+        public Task Client_Ready(DiscordClient sender, ReadyEventArgs args)
         {
-            DiscordBot.botStatus = Bot.BotStatus.Online;
             Instance.Config.BotStatus = "Connected";
             Log.Info("Connected.");
-            switch (Instance.WorldOnline)
-            {
-                case true:
-                    await DiscordBot.Client.UpdateStatusAsync(new DiscordActivity(Instance.Config.StatusMessage, ActivityType.Playing), UserStatus.Online);
-                    break;
-                case false:
-                    await DiscordBot.Client.UpdateStatusAsync(new DiscordActivity(Instance.Config.StatusMessage, ActivityType.Watching), UserStatus.Idle);
-                    break;
-            }
+            DiscordBot.IsConnected = true;
+            return Task.CompletedTask;
         }
 
         private Task Client_GuildBanAdded(DiscordClient sender, GuildBanAddEventArgs args)

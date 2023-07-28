@@ -58,7 +58,7 @@ namespace RoleRewardBot.Utils
             
             if (!string.IsNullOrWhiteSpace(oldConfig.BotStatusMessage))
             {
-                Config.BotStatus = oldConfig.BotStatusMessage;
+                Config.StatusMessage = oldConfig.BotStatusMessage;
                 logger.AppendLine("Imported BotStatusMessage");
             }
             else
