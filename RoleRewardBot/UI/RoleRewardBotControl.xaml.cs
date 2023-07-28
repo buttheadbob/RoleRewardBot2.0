@@ -36,7 +36,8 @@ namespace RoleRewardBot
             FilteredCount.DataContext = this;
             StatusLabel.DataContext = Config;
             RewardCommandsList.ItemsSource = Config.Rewards;
-            tbRoleComboBox.DataContext = DiscordBot;
+            tbRoleComboBox.DataContext = DiscordBot.ServerData;
+            tbRoleComboBox.ItemsSource = DiscordBot.ServerData.DiscordRoles;
             ForceSelectedPayoutToAll.DataContext = Config;
             ForceSelectedPayoutToAll.ItemsSource = Config.Rewards;
             DiscordBot.ServerData.DiscordMembers.CollectionChanged += DiscordMembersOnCollectionChanged;
@@ -97,12 +98,13 @@ namespace RoleRewardBot
         
         private async void ForceBoosterRewardPayout_OnClick(object sender, RoutedEventArgs e)
         {
-            if (Config.EnabledWhenOnline && DiscordBot.IsBotOnline())
-                await DiscordBot.Pay_Manager.Payout();
-            else if (!Config.EnabledWhenOnline)
-                await DiscordBot.Pay_Manager.Payout();
-            else
-                Log.Warn("Unable to payout rewards.  Offline payout not enabled.");
+            if (!DiscordBot.IsBotOnline())
+            {
+                MessageBox.Show("Bot is not online.  Please start the bot and try again.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            await DiscordBot.Pay_Manager.Payout();
         }
         
         private async void RemoveRegisteredMember_OnClick(object sender, RoutedEventArgs e)
@@ -255,6 +257,12 @@ namespace RoleRewardBot
             
             if ( MessageBox.Show($"Are you sure you want to run the reward command [{Instance.Config.Rewards[ForceSelectedPayoutToAll.SelectedIndex].Name}] on ALL players, regardless if they have already received their rewards or not?  This will not count towards their scheduled reward payments.", "CAUTION!!!", MessageBoxButton.OKCancel, MessageBoxImage.Warning) == MessageBoxResult.Cancel) 
                 return;
+
+            if (!DiscordBot.IsBotOnline())
+            {
+                MessageBox.Show("Bot is not online.  Please start the bot and try again.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
             
             await DiscordBot.Pay_Manager.Payout(Instance.Config.Rewards[ForceSelectedPayoutToAll.SelectedIndex].ID, true);
         }

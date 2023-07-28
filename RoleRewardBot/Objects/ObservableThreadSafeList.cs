@@ -34,6 +34,14 @@ namespace RoleRewardBot.Objects
         {
             lock (_lock)
             {
+                // Config is loaded before plugin ui, so no dispatcher will be set yet...
+                if (m_dispatcher is null)
+                {
+                    Items.Add(item);
+                    OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
+                    return;
+                }
+                
                 m_dispatcher.Invoke(() =>
                 {
                     Items.Add(item);
@@ -89,6 +97,21 @@ namespace RoleRewardBot.Objects
             {
                 lock (_lock)
                 {
+                    // Config is loaded before plugin ui, so no dispatcher will be set yet...
+                    if (m_dispatcher is null)
+                    {
+                        m_notificationSuspended = true;
+
+                        foreach (var item in items)
+                        {
+                            Items.Add(item);
+                        }
+
+                        m_notificationSuspended = false;
+                        OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
+                        return;
+                    }
+                    
                     m_dispatcher.Invoke(() =>
                     {
                         m_notificationSuspended = true;

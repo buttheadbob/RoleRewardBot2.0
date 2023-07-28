@@ -269,6 +269,7 @@
       <DependentUpon>SendDiscordPM.xaml</DependentUpon>
     </Compile>
     <Compile Include="RoleRewardBot\Utils\IDManager.cs" />
+    <Compile Include="RoleRewardBot\Utils\ImportOldRewardBotConfig.cs" />
     <Compile Include="RoleRewardBot\Utils\NLogWrapper.cs" />
     <Compile Include="RoleRewardBot\Utils\PayManager.cs" />
     <Compile Include="RoleRewardBot\Utils\TorchCommandManager.cs" />

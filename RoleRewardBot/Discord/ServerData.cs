@@ -9,5 +9,6 @@ namespace RoleRewardBot.Discord
         public IReadOnlyDictionary<ulong, DiscordRole> roles {get; set; }
         public DiscordGuild guild { get; set; }
         public MyList<DiscordMember> DiscordMembers { get; set; } = new MyList<DiscordMember>();
+        public MyList<DiscordRole> DiscordRoles { get; set; } = new MyList<DiscordRole>();
     }
 }

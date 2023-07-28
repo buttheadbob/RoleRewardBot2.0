@@ -35,6 +35,7 @@ namespace RoleRewardBot.Utils
                 Log.Error($"Command Manager unable to run command [{command}].  The server is offline.");
             
             _manager?.HandleCommandFromServer(command);
+            Log.Info("Command [{0}] executed.", command);
         }
 
         public async Task RunSlow(List<string> commands)

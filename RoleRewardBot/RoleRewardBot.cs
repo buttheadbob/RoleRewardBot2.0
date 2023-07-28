@@ -17,9 +17,8 @@ namespace RoleRewardBot
 {
     public class RoleRewardBot : TorchPluginBase, IWpfPlugin
     {
-
         public static readonly Logger Log = LogManager.GetCurrentClassLogger();
-        private static readonly string CONFIG_FILE_NAME = "MainConfig.cfg";
+        private static readonly string CONFIG_FILE_NAME = "RoleRewardBot_Config.cfg";
         private RoleRewardBotControl _control;
         public UserControl GetControl() => _control ?? (_control = new RoleRewardBotControl(this));
         private Persistent<MainConfig> _config;
@@ -29,13 +28,13 @@ namespace RoleRewardBot
         public bool WorldOnline;
         public static readonly TorchCommandManager CommandsManager = new TorchCommandManager();
         public static Bot DiscordBot = new Bot();
-        
-        
+
         public override async void Init(ITorchBase torch)
         {
             base.Init(torch);
             Instance = this;
             SetupConfig();
+            await OldRewardBotConfig.Import();
             var sessionManager = Torch.Managers.GetManager<TorchSessionManager>();
             if (sessionManager != null)
                 sessionManager.SessionStateChanged += SessionChanged;

@@ -10,6 +10,5 @@ namespace RoleRewardBot.Objects
         public string CommandRole { get; set; }
         public int ExpiresInDays { get; set; }
         public string DaysToPay { get; set; }
-        public DateTime LastRun { get; set; }
     }
 }

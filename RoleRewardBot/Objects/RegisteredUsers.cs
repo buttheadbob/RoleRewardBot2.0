@@ -9,6 +9,5 @@ namespace RoleRewardBot.Objects
         public string DiscordUsername { get; set; }
         public ulong DiscordId { get; set; }
         public DateTime Registered { get; set; }
-        public DateTime LastPayout { get; set; }
     }
 }

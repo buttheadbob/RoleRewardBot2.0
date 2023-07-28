@@ -22,7 +22,7 @@ namespace RoleRewardBot
         private string m_discordBotName = "RoleRewardBot";
         public string DiscordBotName { get => m_discordBotName; set => SetValue(ref m_discordBotName, value); }
         
-        private string m_discordBotEmbedAuthorAvatarURL = "https://cdn.discordapp.com/avatars/0/0.png";
+        private string m_discordBotEmbedAuthorAvatarURL = "https://i.postimg.cc/RF0WdQx4/reward.png";
         public string DiscordBotEmbedAuthorAvatarURL { get => m_discordBotEmbedAuthorAvatarURL; set => SetValue(ref m_discordBotEmbedAuthorAvatarURL, value); }
 
         private string m_statusMessage = "Rewarding Space Engineers!!";

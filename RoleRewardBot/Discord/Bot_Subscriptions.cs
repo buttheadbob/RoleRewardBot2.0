@@ -49,6 +49,16 @@ namespace RoleRewardBot.Discord
             DiscordBot.Client.SocketClosed += Client_SocketClosed;
             
             DiscordBot.ServerData.DiscordMembers.AddRange(m_members);
+            
+            // Get all roles
+            List<DiscordRole> tempRoles = new List<DiscordRole>();
+            foreach (var role in m_guilds[0].Roles)
+            {
+                tempRoles.Add(role.Value);
+            }
+            // Add the roles as a group from the guild data instead of individually
+            // This is to prevent UI update on each individual add
+            DiscordBot.ServerData.DiscordRoles.AddRange(tempRoles);
         }
 
         private Task Client_SocketClosed(DiscordClient sender, SocketCloseEventArgs args)
