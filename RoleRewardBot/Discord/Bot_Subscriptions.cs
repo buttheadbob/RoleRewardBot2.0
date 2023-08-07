@@ -27,14 +27,6 @@ namespace RoleRewardBot.Discord
             // Get bot user
             DiscordBot.BotUser = await DiscordBot.Client.GetUserAsync(DiscordBot.Client.CurrentUser.Id, true);
             
-            // Set Bot Name, Status
-            if (Instance.Config.DiscordBotName != DiscordBot.BotUser.Username)
-                await DiscordBot.Client.UpdateCurrentUserAsync(Instance.Config.DiscordBotName);
-            
-            if (Instance.WorldOnline)
-                await DiscordBot.Client.UpdateStatusAsync(new DiscordActivity(Instance.Config.StatusMessage, ActivityType.Playing), UserStatus.Online);
-            else
-                await DiscordBot.Client.UpdateStatusAsync(new DiscordActivity("for the server to come online...", ActivityType.Watching), UserStatus.DoNotDisturb);
             
             // Pointer to guild data, this is not a sharded bot!
             m_bot.ServerData.guild = m_guilds[0];
@@ -66,6 +58,18 @@ namespace RoleRewardBot.Discord
             // Add the roles as a group from the guild data instead of individually
             // This is to prevent UI update on each individual add
             DiscordBot.ServerData.DiscordRoles.AddRange(tempRoles);
+            
+            // Set Bot Name, Status
+            if (Instance.Config.DiscordBotName != DiscordBot.BotUser.Username)
+            {
+                await DiscordBot.Client.UpdateCurrentUserAsync(Instance.Config.DiscordBotName);
+                await DiscordBot.ServerData.guild.CurrentMember.ModifyAsync(mdl => mdl.Nickname = Instance.Config.DiscordBotName);
+            }
+            
+            if (Instance.WorldOnline)
+                await DiscordBot.Client.UpdateStatusAsync(new DiscordActivity(Instance.Config.StatusMessage, ActivityType.Playing), UserStatus.Online);
+            else
+                await DiscordBot.Client.UpdateStatusAsync(new DiscordActivity("for the server to come online...", ActivityType.Watching), UserStatus.DoNotDisturb);
         }
 
         private Task Client_SocketClosed(DiscordClient sender, SocketCloseEventArgs args)

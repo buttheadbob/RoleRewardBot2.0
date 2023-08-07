@@ -56,6 +56,7 @@ namespace RoleRewardBot
             Instance.Config.BotStatus = "Connecting...";
             await DiscordBot.ConnectAsync();
             
+            
         }
 
         private async void ForceBotOffline_OnClick(object sender, RoutedEventArgs e)
@@ -64,6 +65,7 @@ namespace RoleRewardBot
             Instance.Config.BotStatus = "Disconnecting...";
             await DiscordBot.Client.DisconnectAsync();
             Instance.Config.BotStatus = "Offline";
+            DiscordBot.IsConnected = false;
         }
 
         private void RegisteredUsersOnCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)

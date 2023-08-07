@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
@@ -17,132 +18,142 @@ namespace RoleRewardBot.Utils
         
         public static async Task Import()
         {
-            if (!File.Exists(Path.Combine(StoragePath, fileName)))
-                return;
-            
-            RewardsBotConfig oldConfig;
-            
-            XmlSerializer XmlSerialization = new XmlSerializer(typeof(RewardsBotConfig));
-            using (StreamReader reader = new StreamReader(Path.Combine(StoragePath, fileName)))
+            try
             {
-                oldConfig = XmlSerialization.Deserialize(reader) as RewardsBotConfig;
-            }
+                if (!File.Exists(Path.Combine(StoragePath, fileName)))
+                    return;
+            
+                RewardBotConfig oldConfig;
+                
+                XmlSerializer XmlSerialization = new XmlSerializer(typeof(RewardBotConfig));
+                using (StreamReader reader = new StreamReader(Path.Combine(StoragePath, fileName)))
+                {
+                    oldConfig = XmlSerialization.Deserialize(reader) as RewardBotConfig;
+                }
 
-            if (oldConfig is null)
-            {
-                Log.Warn("Old config is null, nothing to do.");
-            }
-            
-            StringBuilder logger = new StringBuilder();
-            logger.AppendLine("Importing old config...");
-            
-            if (!string.IsNullOrWhiteSpace(oldConfig.BotKey))
-            {
-                Config.Token = oldConfig.BotKey;
-                logger.AppendLine("Imported BotKey");
-            }
-            else
-            {
-                logger.AppendLine("Failed to import BotKey");
-            }
-            
-            if (!string.IsNullOrWhiteSpace(oldConfig.BotName))
-            {
-                Config.DiscordBotName = oldConfig.BotName;
-                logger.AppendLine("Imported BotName");
-            }
-            else
-            {
-                logger.AppendLine("Failed to import BotName");
-            }
-            
-            if (!string.IsNullOrWhiteSpace(oldConfig.BotStatusMessage))
-            {
-                Config.StatusMessage = oldConfig.BotStatusMessage;
-                logger.AppendLine("Imported BotStatusMessage");
-            }
-            else
-            {
-                logger.AppendLine("Failed to import BotStatusMessage");
-            }
-            
-            if (oldConfig.EnabledOffline)
-            {
-                Config.EnabledOnAppStart = oldConfig.EnabledOffline;
-                logger.AppendLine("Imported EnabledOffline");
-            }
-            else
-            {
-                logger.AppendLine("Failed to import EnabledOffline");
-            }
-            
-            if (oldConfig.EnabledOnline)
-            {
-                Config.EnabledOnGameStart = oldConfig.EnabledOnline;
-                logger.AppendLine("Imported EnabledOnline");
-            }
-            else
-            {
-                logger.AppendLine("Failed to import EnabledOnline");
-            }
-            
-            if (oldConfig.RemoveBannedUsersFromRegistry)
-            {
-                Config.RemoveOnBannedUser = oldConfig.RemoveBannedUsersFromRegistry;
-                logger.AppendLine("Imported RemoveBannedUsersFromRegistry");
-            }
-            else
-            {
-                logger.AppendLine("Failed to import RemoveBannedUsersFromRegistry");
-            }
-            
-            if (oldConfig.LinkRequests != null)
-            {
-                Config.LinkRequests.AddRange(oldConfig.LinkRequests);
-                logger.AppendLine("Imported LinkRequests");
-            }
-            else
-            {
-                logger.AppendLine("Failed to import LinkRequests");
-            }
-            
-            if (oldConfig.RegisteredUsers != null)
-            {
-                Config.RegisteredUsers.AddRange(oldConfig.RegisteredUsers);
-                logger.AppendLine("Imported RegisteredUsers");
-            }
-            else
-            {
-                logger.AppendLine("Failed to import RegisteredUsers");
-            }
-            
-            if (oldConfig.Rewards != null)
-            {
-                Config.Rewards.AddRange(oldConfig.Rewards);
-                logger.AppendLine("Imported Rewards");
-            }
-            else
-            {
-                logger.AppendLine("Failed to import Rewards");
-            }
-            
-            if (oldConfig.Payouts != null)
-            {
-                Config.Payouts.AddRange(oldConfig.Payouts);
-                logger.AppendLine("Imported Payouts");
-            }
-            else
-            {
-                logger.AppendLine("Failed to import Payouts");
-            }
-            
-            Config.LastPayoutId = oldConfig.LastPayoutId;
-            Config.LastRewardId = oldConfig.LastRewardId;
-            logger.AppendLine("Imported Control ID's");
+                if (oldConfig is null)
+                {
+                    Log.Warn("Old config is null, nothing to do.");
+                }
+                
+                StringBuilder logger = new StringBuilder();
+                logger.AppendLine("Importing old config...");
+                
+                if (!string.IsNullOrWhiteSpace(oldConfig.BotKey))
+                {
+                    Config.Token = oldConfig.BotKey;
+                    logger.AppendLine("Imported BotKey");
+                }
+                else
+                {
+                    logger.AppendLine("Failed to import BotKey");
+                }
+                
+                if (!string.IsNullOrWhiteSpace(oldConfig.BotName))
+                {
+                    Config.DiscordBotName = oldConfig.BotName;
+                    logger.AppendLine("Imported BotName");
+                }
+                else
+                {
+                    logger.AppendLine("Failed to import BotName");
+                }
+                
+                if (!string.IsNullOrWhiteSpace(oldConfig.BotStatusMessage))
+                {
+                    Config.StatusMessage = oldConfig.BotStatusMessage;
+                    logger.AppendLine("Imported BotStatusMessage");
+                }
+                else
+                {
+                    logger.AppendLine("Failed to import BotStatusMessage");
+                }
+                
+                if (oldConfig.EnabledOffline)
+                {
+                    Config.EnabledOnAppStart = oldConfig.EnabledOffline;
+                    logger.AppendLine("Imported EnabledOffline");
+                }
+                else
+                {
+                    logger.AppendLine("Failed to import EnabledOffline");
+                }
+                
+                if (oldConfig.EnabledOnline)
+                {
+                    Config.EnabledOnGameStart = oldConfig.EnabledOnline;
+                    logger.AppendLine("Imported EnabledOnline");
+                }
+                else
+                {
+                    logger.AppendLine("Failed to import EnabledOnline");
+                }
+                
+                if (oldConfig.RemoveBannedUsersFromRegistry)
+                {
+                    Config.RemoveOnBannedUser = oldConfig.RemoveBannedUsersFromRegistry;
+                    logger.AppendLine("Imported RemoveBannedUsersFromRegistry");
+                }
+                else
+                {
+                    logger.AppendLine("Failed to import RemoveBannedUsersFromRegistry");
+                }
+                
+                if (oldConfig.LinkRequests != null)
+                {
+                    Config.LinkRequests.AddRange(oldConfig.LinkRequests);
+                    logger.AppendLine("Imported LinkRequests");
+                }
+                else
+                {
+                    logger.AppendLine("Failed to import LinkRequests");
+                }
+                
+                if (oldConfig.RegisteredUsers != null)
+                {
+                    Config.RegisteredUsers.AddRange(oldConfig.RegisteredUsers);
+                    logger.AppendLine("Imported RegisteredUsers");
+                }
+                else
+                {
+                    logger.AppendLine("Failed to import RegisteredUsers");
+                }
+                
+                if (oldConfig.Rewards != null)
+                {
+                    Config.Rewards.AddRange(oldConfig.Rewards);
+                    logger.AppendLine("Imported Rewards");
+                }
+                else
+                {
+                    logger.AppendLine("Failed to import Rewards");
+                }
+                
+                if (oldConfig.Payouts != null)
+                {
+                    Config.Payouts.AddRange(oldConfig.Payouts);
+                    logger.AppendLine("Imported Payouts");
+                }
+                else
+                {
+                    logger.AppendLine("Failed to import Payouts");
+                }
+                
+                Config.LastPayoutId = oldConfig.LastPayoutId;
+                Config.LastRewardId = oldConfig.LastRewardId;
+                logger.AppendLine("Imported Control ID's");
 
-            Log.Info(logger.ToString());
+                Log.Info(logger.ToString());
 
-            await FinishedWithOldConfig(Path.Combine(StoragePath, fileName));
+                await FinishedWithOldConfig(Path.Combine(StoragePath, fileName));
+            }
+            catch (Exception e)
+            {
+                Log.Warn(e, "There was an error trying to import the old config file.");
+            }
+            
+            
+            
         }
         
         private static Task FinishedWithOldConfig(string path_fileName)
@@ -155,7 +166,7 @@ namespace RoleRewardBot.Utils
     
     
     
-    public class RewardsBotConfig
+    public class RewardBotConfig
     {
         public string BotName;
         public string BotKey;
