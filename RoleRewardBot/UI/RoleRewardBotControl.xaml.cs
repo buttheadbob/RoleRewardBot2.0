@@ -31,6 +31,8 @@ namespace RoleRewardBot
             InitializeComponent();
             Instance.MainDispatcher = FilteredCount.Dispatcher;
             DataContext = Config;
+            FilteredRegisteredUsers.AddRange(Config.RegisteredUsers);
+            RegisteredMembersGrid.ItemsSource = FilteredRegisteredUsers;
             DiscordMembersGrid.DataContext = this;
             RegisteredMembersGrid.DataContext = this;
             FilteredCount.DataContext = this;
@@ -173,8 +175,8 @@ namespace RoleRewardBot
                 RegisteredMembersGrid.ItemsSource = null;
                 FilteredRegisteredUsers.Clear();
                 FilteredRegisteredUsers.AddRange(Config.RegisteredUsers);
-                RegisteredMembersGrid.ItemsSource = FilteredDiscordMembers;
-                FilteredRegisteredCount.Text = $"Showing: {FilteredDiscordMembers.Count} of {DiscordBot.ServerData.DiscordMembers.Count}";
+                RegisteredMembersGrid.ItemsSource = FilteredRegisteredUsers;
+                FilteredRegisteredCount.Text = $"Showing: {FilteredRegisteredUsers.Count} of {Config.RegisteredUsers.Count}";
                 return;
             }
             
@@ -201,15 +203,14 @@ namespace RoleRewardBot
                     continue;
                 }
 
-                if (!string.IsNullOrEmpty(registeredMember.IngameName) &&
-                    registeredMember.IngameName.ToLower().Contains(tempTextBox.Text.ToLower()))
+                if (!string.IsNullOrEmpty(registeredMember.IngameName) && registeredMember.IngameName.ToLower().Contains(tempTextBox.Text.ToLower()))
                 {
                     FilteredRegisteredUsers.Add(registeredMember);
                     continue;
                 }
             }
 
-            FilteredRegisteredCount.Text = $"Showing: {FilteredDiscordMembers.Count} of {DiscordBot.ServerData.DiscordMembers.Count}";
+            FilteredRegisteredCount.Text = $"Showing: {FilteredDiscordMembers.Count} of {Config.RegisteredUsers.Count}";
             RegisteredMembersGrid.ItemsSource = FilteredRegisteredUsers;
         }
         

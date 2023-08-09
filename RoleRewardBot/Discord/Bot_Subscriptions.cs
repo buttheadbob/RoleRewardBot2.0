@@ -1,9 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using NLog;
+using NLog.Fluent;
 using static RoleRewardBot.RoleRewardBot;
 
 namespace RoleRewardBot.Discord
@@ -83,6 +85,19 @@ namespace RoleRewardBot.Discord
             Instance.Config.BotStatus = "Connected";
             Log.Info("Connected.");
             DiscordBot.IsConnected = true;
+            
+            // Check Intents
+            DiscordIntents enabledIntents = DiscordBot.Client.Intents;
+            // Iterate through all possible intents
+            foreach (DiscordIntents intent in Enum.GetValues(typeof(DiscordIntents)))
+            {
+                Log.Info(enabledIntents.HasFlag(intent)
+                    ? $"Bot has enabled intent: {intent}"
+                    : $"Bot does not have enabled intent: {intent}");
+            }
+            
+            Log.Info($"Enabled Intents: {enabledIntents}");
+            
             return Task.CompletedTask;
         }
 

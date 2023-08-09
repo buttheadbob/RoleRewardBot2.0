@@ -23,7 +23,7 @@
         <Label Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="2" Content="Rewards Bot" FontSize="40" FontWeight="Heavy" Foreground="#FF27E915"/>
 
         <TabControl Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2">
-            <TabItem Header="Settings" IsSelected="True">
+            <TabItem Header="Settings" >
                 <Grid Background="LightSlateGray">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="10" />
@@ -244,7 +244,7 @@
                 </Grid>
             </TabItem>
             
-            <TabItem Header="Discord" >
+            <TabItem Header="Discord" IsSelected="True">
                 <Grid Background = "LightSlateGray">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="10"/>

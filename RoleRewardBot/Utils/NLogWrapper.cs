@@ -46,6 +46,10 @@ namespace RoleRewardBot.Utils
             if (IsEnabled(logLevel))
             {
                 string message = formatter(state, exception);
+                
+                if (message.Contains("GUILD_AUDIT_LOG"))
+                    return;
+                
                 if (exception != null)
                     message = "\n" + exception;
                 _logger.Log(ConvertLogLevel(logLevel), message);
