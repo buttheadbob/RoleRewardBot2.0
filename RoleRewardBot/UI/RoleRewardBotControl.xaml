@@ -23,7 +23,7 @@
         <Label Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="2" Content="Rewards Bot" FontSize="40" FontWeight="Heavy" Foreground="#FF27E915"/>
 
         <TabControl Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2">
-            <TabItem Header="Settings" >
+            <TabItem Header="Settings" IsSelected="True">
                 <Grid Background="LightSlateGray">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="10" />
@@ -43,7 +43,7 @@
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
                     
-                    <StackPanel Grid.Column="1" Grid.Row="5" UseLayoutRounding="True" Background="Cornsilk">
+                    <StackPanel Grid.Column="1" Grid.Row="5" UseLayoutRounding="True" Background="Cornsilk" HorizontalAlignment="Center">
                         <CheckBox Name="EnableOnlineCheckBox" IsChecked="{Binding EnabledOnGameStart }" Content="Run bot when server goes online." Click="EnableOnlineCheckBox_OnClick"/>
                         <CheckBox Name="EnableOfflineCheckBox" IsChecked="{Binding EnabledOnAppStart }" Content="Run bot before server starts." Click="EnableOfflineCheckBox_OnClick"/>
                         <CheckBox Name="RemoveBannedUsersFromRegistryCheckBox" IsChecked="{Binding RemoveOnBannedUser }" Content="Removed users from registry when banned." ToolTip="This will result in removing players from short term bans also." Click="RemoveBannedUsersFromRegistryCheckBox_OnClick"/>
@@ -56,6 +56,20 @@
                         
                         <Label Content="Bot Name" Margin="0,5,0,0"/>
                         <TextBox Text="{Binding DiscordBotName}" ToolTip="Bot Name to use on Discord." Margin="2,0,2,0"/>
+                        
+                        <CheckBox Content="Add/Remove Role for registered members" Margin="2,15,0,0" IsChecked="{Binding ManageRegisteredRole}"/>
+                        <TextBlock Text="Enter Role ID below or select from the list after connected." Margin="2,0,2,0"/>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                            <TextBox Name="TxBoxRole" Width="200" Margin="2,2,0,2" Text="{Binding RegisteredRoleId}" TextChanged="TxBoxRole_OnTextChanged"/>
+                            <ComboBox Name="TbManageRoleComboBox" Width="130" Margin="2,2,0,2" SelectionChanged="TbManageRoleComboBox_OnSelectionChanged" >
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding Path=Name}"/>
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+                            </ComboBox>
+                        </StackPanel>
+                        
                         
                         <Button Content="Save Config" Margin="5" Click="SaveButton_OnClick"/>
                     </StackPanel>
@@ -117,7 +131,7 @@
                                  <DataGrid.Columns>
                                      <DataGridTextColumn Header="ID" Width="50" Binding="{Binding ID}" IsReadOnly="True"/>
                                      <DataGridTextColumn Header="Name" Width="Auto" Binding="{Binding Name}" IsReadOnly="True"/>
-                                     <DataGridTextColumn Header="Role" Width="Auto" MinWidth="100" Binding="{Binding Path=CommandRole}" IsReadOnly="True"/>
+                                     <DataGridTextColumn Header="Role" Width="Auto" MinWidth="100" Binding="{Binding Path=RewardedRole}" IsReadOnly="True"/>
                                      <DataGridTextColumn Header="PayDay(s)" Width="Auto" MinWidth="100" Binding="{Binding Path=DaysToPay}" IsReadOnly="True"/>
                                      <DataGridTextColumn Header="Expires" Width="Auto" MinWidth="50" Binding="{Binding Path=ExpiresInDays}" IsReadOnly="True"/>
                                  </DataGrid.Columns>
@@ -244,7 +258,7 @@
                 </Grid>
             </TabItem>
             
-            <TabItem Header="Discord" IsSelected="True">
+            <TabItem Header="Discord" >
                 <Grid Background = "LightSlateGray">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="10"/>

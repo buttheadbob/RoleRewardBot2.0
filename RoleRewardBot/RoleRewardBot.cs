@@ -59,6 +59,13 @@ namespace RoleRewardBot
                     WorldOnline = true;
                     if (DiscordBot.IsConnected)
                         await DiscordBot.Client.UpdateStatusAsync(new DiscordActivity(Instance.Config.StatusMessage, ActivityType.Playing), UserStatus.Online);
+                    else
+                    {
+                        if (Config.EnabledOnGameStart)
+                        {
+                            await DiscordBot.ConnectAsync();
+                        }
+                    }
                     break;
 
                 case TorchSessionState.Unloading:

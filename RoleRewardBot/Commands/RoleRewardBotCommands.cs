@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Text;
+using DSharpPlus.Entities;
 using RoleRewardBot.Objects;
 using Torch.Commands;
 using Torch.Commands.Permissions;
@@ -27,7 +28,7 @@ namespace RoleRewardBot
         
         [Command("Link", "Links your Steam account to your Discord account using a special code you received in Discord.  Use -> !RewardBot Link <code>")]
         [Permission(MyPromoteLevel.None)]
-        public void LinkAccount(string code)
+        public async void LinkAccount(string code)
         {
             if (Context.Player == null)
             {
@@ -55,10 +56,27 @@ namespace RoleRewardBot
                 Plugin.Config.RegisteredUsers.Add(user); 
 
                 Plugin.Config.LinkRequests.Remove(request);
-                Plugin.Save();
+                await Plugin.Save();
                 
                 Context.Respond($"Your SteamID [{user.IngameSteamId}] has successfully been linked to your Discord account [{user.DiscordUsername}], and are now registered to receive rewards!");
                 foundCode = true;
+                
+                // Assign registered role, if setup
+                if (Plugin.Config.ManageRegisteredRole)
+                {
+                    if (ulong.TryParse(Plugin.Config.RegisteredRoleId, out ulong roleId))
+                    {
+                        try
+                        {
+                            DiscordRole role = RoleRewardBot.DiscordBot.ServerData.guild.GetRole(roleId);
+                            await RoleRewardBot.DiscordBot.ServerData.guild.GetMemberAsync(user.DiscordId).Result.GrantRoleAsync(role);
+                        }
+                        catch (Exception e)
+                        {
+                            RoleRewardBot.Log.Error("Error trying to assign role to new registered user." + e);
+                        }
+                    }
+                }
                 break;
             }
 
@@ -70,7 +88,7 @@ namespace RoleRewardBot
         
         [Command("Unlink", "This will remove any connection between your SteamID and Discord account on UpsideDown.  No information will be retained.  You will also no longer be eligible to receive some Rewards if qualified.")]
         [Permission(MyPromoteLevel.None)]
-        public void Unlink()
+        public async void Unlink()
         {
             if (Context.Player == null)
             {
@@ -92,7 +110,23 @@ namespace RoleRewardBot
             {
                 Plugin.Config.RegisteredUsers.Remove(foundUser);
                 Context.Respond($"Your SteamId is no longer linked to your Discord.  You are no longer able to receive any rewards that require this connection.");
-                Plugin.Save();
+                await Plugin.Save();
+                // Remove registered role, if setup
+                if (!Plugin.Config.ManageRegisteredRole) return;
+                if (!ulong.TryParse(Plugin.Config.RegisteredRoleId, out ulong roleId))
+                {
+                    RoleRewardBot.Log.Error("Invalid Role ID for registered role.  Please check your settings.");
+                    return;
+                }
+                try
+                {
+                    DiscordRole role = RoleRewardBot.DiscordBot.ServerData.guild.GetRole(roleId);
+                    await RoleRewardBot.DiscordBot.ServerData.guild.GetMemberAsync(foundUser.DiscordId).Result.RevokeRoleAsync(role);
+                }
+                catch (Exception e)
+                {
+                    RoleRewardBot.Log.Error("Error trying to revoke role to user after unlinking." + e);
+                }
             }
             else 
             {
@@ -122,12 +156,12 @@ namespace RoleRewardBot
 
             Context.Respond(count == 0 ? "You have no rewards available to claim at this time." : $"{count} reward(s) have been issued.");
 
-            Plugin.Save();
+            await Plugin.Save();
         }
 
         [Command("Claim Item", "Claim your reward by [ID]")]
         [Permission(MyPromoteLevel.None)]
-        public async void ClaimItem(int payoutID)
+        public async void ClaimItem(int payoutId)
         {
             if (Context.Player == null)
             {
@@ -140,7 +174,7 @@ namespace RoleRewardBot
             {
                 Payout payout = Plugin.Config.Payouts[index];
                 if (payout.SteamID != Context.Player.SteamUserId) continue;
-                if (payout.ID != payoutID) continue;
+                if (payout.ID != payoutId) continue;
                 
                 await RoleRewardBot.CommandsManager.Run(payout.Command);
                 Plugin.Config.Payouts.Remove(payout); 
@@ -149,7 +183,7 @@ namespace RoleRewardBot
             }
             
             Context.Respond(payoutIssued ? "Your reward has been issued." : "No reward with that ID is available to you or no reward with that ID exists.");
-            Plugin.Save();
+            await Plugin.Save();
         }
 
         [Command("List", "Show all your rewards available to claim.")]

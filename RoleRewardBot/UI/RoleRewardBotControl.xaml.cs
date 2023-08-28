@@ -40,6 +40,8 @@ namespace RoleRewardBot
             RewardCommandsList.ItemsSource = Config.Rewards;
             tbRoleComboBox.DataContext = DiscordBot.ServerData;
             tbRoleComboBox.ItemsSource = DiscordBot.ServerData.DiscordRoles;
+            TbManageRoleComboBox.DataContext = DiscordBot.ServerData;
+            TbManageRoleComboBox.ItemsSource = DiscordBot.ServerData.DiscordRoles;
             ForceSelectedPayoutToAll.DataContext = Config;
             ForceSelectedPayoutToAll.ItemsSource = Config.Rewards;
             DiscordBot.ServerData.DiscordMembers.CollectionChanged += DiscordMembersOnCollectionChanged;
@@ -232,7 +234,7 @@ namespace RoleRewardBot
                 ID = DiscordBot.ID_Manager.GetNewRewardID(),
                 Name = NewCommandName.Text,
                 Command = CommandText.Text,
-                CommandRole = tbCommandRole.Text,
+                RewardedRole = tbCommandRole.Text,
                 DaysToPay = tbDaysToPay.Text,
                 ExpiresInDays = expiredInDays
             };
@@ -479,6 +481,19 @@ namespace RoleRewardBot
             Instance.Config.Rewards.Remove(reward);
             RewardCommandsList.ItemsSource = Instance.Config.Rewards;
             await Instance.Save();
+        }
+
+        private void TbManageRoleComboBox_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            TxBoxRole.Text = ((DiscordRole)TbManageRoleComboBox.SelectedItem).Id.ToString();
+        }
+
+        private void TxBoxRole_OnTextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (!ulong.TryParse(TxBoxRole.Text, out ulong roleId)) return;
+            if (roleId == 0) return;
+            if(roleId.ToString().Length < 18) return; // Role Ids are always 18 digits in the old system and 19 on the new system.
+            Instance.Config.RegisteredRoleId = roleId.ToString();
         }
     }
 }

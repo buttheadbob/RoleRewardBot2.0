@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using NLog;
-using NLog.Fluent;
+using RoleRewardBot.Objects;
 using static RoleRewardBot.RoleRewardBot;
 
 namespace RoleRewardBot.Discord
@@ -61,6 +62,39 @@ namespace RoleRewardBot.Discord
             // This is to prevent UI update on each individual add
             DiscordBot.ServerData.DiscordRoles.AddRange(tempRoles);
             
+            // Verify correct players have the register role if enabled and role id available
+            if (Instance.Config.ManageRegisteredRole )
+            {
+                if (ulong.TryParse(Instance.Config.RegisteredRoleId, out ulong roleId))
+                {
+                    try
+                    {
+                        DiscordRole role = m_guilds[0].GetRole(roleId);
+                        
+                        // Assign role to registered members that do not already have it.
+                        foreach (RegisteredUsers registeredUser in Instance.Config.RegisteredUsers)
+                        {
+                            if (registeredUser.DiscordId == 0) continue;
+                            DiscordMember member = await m_guilds[0].GetMemberAsync(registeredUser.DiscordId);
+                            if (member == null) continue;
+                            if (member.Roles.Contains(role)) continue;
+                            await member.GrantRoleAsync(role);
+                        }
+                        
+                        // Remove role from members that are not registered.
+                        foreach (DiscordMember member in m_members)
+                        {
+                            if (Instance.Config.RegisteredUsers.Any(x => x.DiscordId == member.Id)) continue;
+                            if (!member.Roles.Contains(role)) continue;
+                            await member.RevokeRoleAsync(role);
+                        }
+                    } catch (Exception e)
+                    {
+                        Log.Error(e, "Managed Role ID provided is invalid.");
+                    }
+                }
+            }
+            
             // Set Bot Name, Status
             if (Instance.Config.DiscordBotName != DiscordBot.BotUser.Username)
             {
@@ -86,6 +120,7 @@ namespace RoleRewardBot.Discord
             Log.Info("Connected.");
             DiscordBot.IsConnected = true;
             
+            /* more for debugging
             // Check Intents
             DiscordIntents enabledIntents = DiscordBot.Client.Intents;
             // Iterate through all possible intents
@@ -96,7 +131,7 @@ namespace RoleRewardBot.Discord
                     : $"Bot does not have enabled intent: {intent}");
             }
             
-            Log.Info($"Enabled Intents: {enabledIntents}");
+            Log.Info($"Enabled Intents: {enabledIntents}");*/
             
             return Task.CompletedTask;
         }

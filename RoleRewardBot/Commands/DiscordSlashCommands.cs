@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Text;
 using System.Threading.Tasks;
+using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using RoleRewardBot.Objects;
 
@@ -71,6 +72,24 @@ namespace RoleRewardBot
                 Config.RegisteredUsers.RemoveAt(index);
                 await RoleRewardBot.Instance.Save();
                 await ctx.CreateResponseAsync($"You have been unlinked.", true);
+                // Remove registered role, if setup
+                if (!RoleRewardBot.Instance.Config.ManageRegisteredRole) return;
+                if (!ulong.TryParse(RoleRewardBot.Instance.Config.RegisteredRoleId, out ulong roleId))
+                {
+                    RoleRewardBot.Log.Error("Invalid Role ID for registered role.  Please check your settings.");
+                    return;
+                }
+                
+                try
+                {
+                    DiscordRole role = RoleRewardBot.DiscordBot.ServerData.guild.GetRole(roleId);
+                    await RoleRewardBot.DiscordBot.ServerData.guild.GetMemberAsync(ctx.Member.Id).Result.RevokeRoleAsync(role);
+                }
+                catch (Exception e)
+                {
+                    RoleRewardBot.Log.Error("Error trying to revoke role to user after unlinking." + e);
+                }
+                
                 return;
             }
             

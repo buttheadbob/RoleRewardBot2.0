@@ -27,5 +27,11 @@ namespace RoleRewardBot
 
         private string m_BotStatus;
         public string BotStatus { get => m_BotStatus; set => SetValue(ref m_BotStatus, value); }
+
+        private bool m_manageRegisteredRole;
+        public bool ManageRegisteredRole { get => m_manageRegisteredRole; set => SetValue(ref m_manageRegisteredRole, value); }
+
+        private string m_registeredRoleId;
+        public string RegisteredRoleId { get => m_registeredRoleId; set => SetValue(ref m_registeredRoleId, value); }
     }
 }

@@ -19,7 +19,7 @@ namespace RoleRewardBot.Utils
     {
         private static MainConfig Config => RoleRewardBot.Instance.Config;
         private Logger Log = LogManager.GetLogger("Role Rewards Bot Payout Manager");
-        private Timer _payoutTimer = new Timer(60000); // Checks for bot and server status every minute to issue payout, or dispose timer if payout already issued for the day.
+        private readonly Timer _payoutTimer = new Timer(60000); // Checks for bot and server status every minute to issue payout, or dispose timer if payout already issued for the day.
 
         public PayManager()
         {
@@ -95,8 +95,6 @@ namespace RoleRewardBot.Utils
                 for (int userIndex = Config.RegisteredUsers.Count - 1; userIndex >= 0; userIndex--)
                 {
                     RegisteredUsers registeredUser = Config.RegisteredUsers[userIndex];
-
-                    // see if member already received scheduled payout for today
                     
                     DiscordUser member = await RoleRewardBot.DiscordBot.Client.GetUserAsync(Config.RegisteredUsers[userIndex].DiscordId);
                     
@@ -119,7 +117,7 @@ namespace RoleRewardBot.Utils
                         // Only pay users with the appropriate role...
                         foreach (KeyValuePair<ulong, DiscordRole> memberRole in RoleRewardBot.DiscordBot.ServerData.roles)
                         {
-                            if (memberRole.Value.Name != reward.CommandRole) continue;
+                            if (memberRole.Value.Name != reward.RewardedRole) continue;
                             
                             // Payday!!
                             string startCommand = reward.Command.Replace("{SteamID}", registeredUser.IngameSteamId.ToString());
@@ -180,12 +178,12 @@ namespace RoleRewardBot.Utils
             }
             
             // PAY ALL!!!
-            if (rewardID == 0) // ID start at 1 on purpose, no selection sends 0 as default.
+            if (rewardID < 1) // ID start at 1 on purpose, no selection sends 0 as default.
             {
                 MessageBox.Show("An attempt to force-pay all members a reward has failed, invalid reward selected.","Error",MessageBoxButton.OK,MessageBoxImage.Information);
                 return;
             }
-            payoutReport.AppendLine("** THIS IS A PAYALL REQUEST **");
+            payoutReport.AppendLine("** THIS IS A PAY-ALL REQUEST **");
 
             if (Config.RegisteredUsers.Count == 0)
             {
@@ -229,7 +227,7 @@ namespace RoleRewardBot.Utils
                     // Only pay users with the appropriate role...
                     foreach (DiscordRole role in _user.Roles)
                     {
-                        if (role.Name != selectedReward.CommandRole) continue;
+                        if (role.Name != selectedReward.RewardedRole) continue;
                         // Payday!!
                         string startCommand = selectedReward.Command.Replace("{SteamID}", registeredUser.IngameSteamId.ToString());
                         string finishCommand = startCommand.Replace("{Username}", registeredUser.IngameName);
