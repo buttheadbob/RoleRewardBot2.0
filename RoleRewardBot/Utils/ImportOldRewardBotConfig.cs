@@ -9,6 +9,7 @@ using RoleRewardBot.Objects;
 
 namespace RoleRewardBot.Utils
 {
+    [Obsolete("This is no longer needed as of v2.0.0.  Leaving it here for reference.")]
     public static class OldRewardBotConfig
     {
         private const string fileName = "RewardsBotConfig.cfg";

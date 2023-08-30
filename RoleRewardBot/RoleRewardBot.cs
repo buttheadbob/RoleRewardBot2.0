@@ -35,7 +35,7 @@ namespace RoleRewardBot
             base.Init(torch);
             Instance = this;
             SetupConfig();
-            await OldRewardBotConfig.Import();
+            //await OldRewardBotConfig.Import();  Uploaded v2 as its own plugin and marked v1 as obsolete but still on torch.  lets not import old config anymore.
             var sessionManager = Torch.Managers.GetManager<TorchSessionManager>();
             if (sessionManager != null)
                 sessionManager.SessionStateChanged += SessionChanged;

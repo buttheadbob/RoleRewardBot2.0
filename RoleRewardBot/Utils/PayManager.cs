@@ -43,6 +43,7 @@ namespace RoleRewardBot.Utils
             if (!RoleRewardBot.Instance.WorldOnline) return;
             
             await Payout();
+            await RemoveExpiredPayouts();
             
             Config.lastScheduledPayoutProcessed = DateTime.Now;
             await RoleRewardBot.Instance.Save();
@@ -326,6 +327,18 @@ namespace RoleRewardBot.Utils
 
             Log.Warn(payoutReport);
             Config.Payouts.Add(payTheMan);
+            await RoleRewardBot.Instance.Save();
+        }
+
+        public async Task RemoveExpiredPayouts()
+        {
+            for (int index = Config.Payouts.Count - 1; index >= 0; index--)
+            {
+                if (Config.Payouts[index].ExpiryDate.Date > DateTime.Now.Date) continue;
+                Log.Info($"Removed expired payout for {Config.Payouts[index].IngameName} [{Config.Payouts[index].RewardName}]");
+                Config.Payouts.Remove(Config.Payouts[index]);
+            }
+
             await RoleRewardBot.Instance.Save();
         }
     }
