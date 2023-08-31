@@ -159,7 +159,7 @@ namespace RoleRewardBot
             await Plugin.Save();
         }
 
-        [Command("Claim Item", "Claim your reward by [ID]")]
+        [Command("ClaimItem", "Claim your reward by [ID]")]
         [Permission(MyPromoteLevel.None)]
         public async void ClaimItem(int payoutId)
         {

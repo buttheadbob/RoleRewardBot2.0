@@ -5,7 +5,7 @@
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:RoleRewardBot"
       mc:Ignorable="d" 
-      d:DesignHeight="450" d:DesignWidth="800" Background="#FF1E1E1E">
+      d:DesignHeight="Auto" d:DesignWidth="800" Background="#FF1E1E1E">
 
     <Grid>
         <Grid.ColumnDefinitions>
@@ -47,6 +47,10 @@
                         <CheckBox Name="EnableOnlineCheckBox" IsChecked="{Binding EnabledOnGameStart }" Content="Run bot when server goes online." Click="EnableOnlineCheckBox_OnClick"/>
                         <CheckBox Name="EnableOfflineCheckBox" IsChecked="{Binding EnabledOnAppStart }" Content="Run bot before server starts." Click="EnableOfflineCheckBox_OnClick"/>
                         <CheckBox Name="RemoveBannedUsersFromRegistryCheckBox" IsChecked="{Binding RemoveOnBannedUser }" Content="Removed users from registry when banned." ToolTip="This will result in removing players from short term bans also." Click="RemoveBannedUsersFromRegistryCheckBox_OnClick"/>
+                        
+                        <TextBlock Background="Aqua" Margin="2,15,0,0"  TextWrapping="WrapWithOverflow" MaxWidth="300" >For faster command registration to your Discord server, enter your Discord server ID below.  This is optional.  Without
+                        this it may take up too an hour for Discord to register the commands to your Discord server.</TextBlock>
+                        <TextBox Name="DiscordServerIDtxtBox" Background="Aqua" Margin="10,2,10,0"  Text="{Binding DiscordServerId}"></TextBox>
                         
                         <Label Content="Bot Status Message" Margin="0,5,0,0"/>
                         <TextBox Text="{Binding StatusMessage}" ToolTip="Bot status message.  Default --> Rewarding..." Margin="2,0,2,0"/>

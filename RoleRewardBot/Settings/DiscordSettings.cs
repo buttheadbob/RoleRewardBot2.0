@@ -33,5 +33,8 @@ namespace RoleRewardBot
 
         private string m_registeredRoleId;
         public string RegisteredRoleId { get => m_registeredRoleId; set => SetValue(ref m_registeredRoleId, value); }
+
+        private string m_discordServerId;
+        public string DiscordServerId { get => m_discordServerId; set => SetValue(ref m_discordServerId, value); }
     }
 }

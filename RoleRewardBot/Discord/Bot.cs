@@ -7,6 +7,7 @@ using DSharpPlus.Interactivity;
 using DSharpPlus.Interactivity.Extensions;
 using DSharpPlus.SlashCommands;
 using NLog;
+using NLog.Fluent;
 using RoleRewardBot.Discord.Utils;
 using RoleRewardBot.Utils;
 
@@ -94,7 +95,17 @@ namespace RoleRewardBot.Discord
               // I may add some later, but for now, I don't think I need them.
             
             // Slash Commands
-            slashCommandsConfig.RegisterCommands<DiscordSlashCommands>(1089078620829536269);
+            if (ulong.TryParse(RoleRewardBot.Instance.Config.DiscordServerId, out ulong serverId))
+            {
+                if (serverId != 0)
+                {
+                    slashCommandsConfig.RegisterCommands<DiscordSlashCommands>(serverId);
+                    Log.Info($"Registered Slash Commands for Server ID [{serverId}]");
+                }
+                
+                else
+                    slashCommandsConfig.RegisterCommands<DiscordSlashCommands>();
+            } else slashCommandsConfig.RegisterCommands<DiscordSlashCommands>();
             
             Commands.CommandErrored += Commands_CommandErrored;
             

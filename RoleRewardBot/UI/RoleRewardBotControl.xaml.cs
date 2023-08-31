@@ -99,6 +99,8 @@ namespace RoleRewardBot
 
         private void SaveButton_OnClick(object sender, RoutedEventArgs e)
         {
+            if (!string.IsNullOrWhiteSpace(DiscordServerIDtxtBox.Text))
+                Config.DiscordServerId = DiscordServerIDtxtBox.Text;
             Plugin.Save();
         }
         
