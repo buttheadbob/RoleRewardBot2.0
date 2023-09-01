@@ -7,7 +7,6 @@ using DSharpPlus.Interactivity;
 using DSharpPlus.Interactivity.Extensions;
 using DSharpPlus.SlashCommands;
 using NLog;
-using NLog.Fluent;
 using RoleRewardBot.Discord.Utils;
 using RoleRewardBot.Utils;
 
@@ -18,7 +17,7 @@ namespace RoleRewardBot.Discord
         public DiscordClient Client { get; private set; }
         public InteractivityExtension Interactivity { get; private set; }
         private CommandsNextExtension Commands { get; set; }
-        private Logger Log = LogManager.GetLogger("Rewards Discord Bot");
+        private CustomLogger.LogManager Log => RoleRewardBot.Log;
         private Bot_Subscriptions m_subscriptions = new Bot_Subscriptions();
         public ServerData ServerData = new ServerData();
         public DiscordUser BotUser { get; set; }
@@ -32,7 +31,7 @@ namespace RoleRewardBot.Discord
         {
             if (string.IsNullOrWhiteSpace(RoleRewardBot.Instance.Config.Token))
             {
-                Log.Error("Invalid Bot Token, please set the token in the settings tab.");
+                await Log.Error("Invalid Bot Token, please set the token in the settings tab.");
                 return;
             }
 
@@ -40,13 +39,13 @@ namespace RoleRewardBot.Discord
             {
                 if (!await InitAsync()) return; // Init failed, dont proceed.
                 RoleRewardBot.Instance.Config.BotStatus = "Connecting...";
-                Log.Info("Connecting...");
+                await Log.Info("Connecting...");
                 await Client.ConnectAsync();
                 return;
             }
             
             RoleRewardBot.Instance.Config.BotStatus = "Connecting...";
-            Log.Info("Connecting...");
+            await Log.Info("Connecting...");
             await Client.ConnectAsync(); // Already Init'd, just connect.
         }
 
@@ -69,6 +68,7 @@ namespace RoleRewardBot.Discord
                 HttpTimeout = TimeSpan.FromSeconds(30),
                 MinimumLogLevel = Microsoft.Extensions.Logging.LogLevel.Trace,
                 LoggerFactory = new DSharpPlusNLogAdapter( LogLevel.Trace),
+                GatewayCompressionLevel = GatewayCompressionLevel.None
             };
 
             Client = new DiscordClient(d_config);
@@ -115,10 +115,9 @@ namespace RoleRewardBot.Discord
             return Task.FromResult(true);
         }
 
-        private Task Commands_CommandErrored(CommandsNextExtension sender, CommandErrorEventArgs args)
+        private async Task Commands_CommandErrored(CommandsNextExtension sender, CommandErrorEventArgs args)
         {
-            Log.Error(args.Exception, "Command Errored!");
-            return Task.CompletedTask; 
+            await Log.Error($"Command Errored: {args.Exception}");
         }
 
         public void Dispose()

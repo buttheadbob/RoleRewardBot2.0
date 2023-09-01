@@ -53,7 +53,7 @@ namespace RoleRewardBot
         {
             if (DiscordBot.IsConnected)
             {
-                Log.Warn("Unable to connect to Discord. Bot is already online.");
+                await Log.Warn("Unable to connect to Discord. Bot is already online.");
                 return;
             }
             
@@ -97,11 +97,11 @@ namespace RoleRewardBot
             DataContext = plugin.Config;
         }
 
-        private void SaveButton_OnClick(object sender, RoutedEventArgs e)
+        private async void SaveButton_OnClick(object sender, RoutedEventArgs e)
         {
             if (!string.IsNullOrWhiteSpace(DiscordServerIDtxtBox.Text))
                 Config.DiscordServerId = DiscordServerIDtxtBox.Text;
-            Plugin.Save();
+            await  Plugin.Save();
         }
         
         private async void ForceBoosterRewardPayout_OnClick(object sender, RoutedEventArgs e)
@@ -112,7 +112,7 @@ namespace RoleRewardBot
                 return;
             }
 
-            await DiscordBot.Pay_Manager.Payout();
+            await DiscordBot.Pay_Manager.Payout(payUnpaid: true);
         }
         
         private async void RemoveRegisteredMember_OnClick(object sender, RoutedEventArgs e)
@@ -250,7 +250,7 @@ namespace RoleRewardBot
             logNewCommand.AppendLine($"Command: {reward.Command}");
             logNewCommand.AppendLine("Saving settings...");
             await Instance.Save();
-            Log.Info(logNewCommand);
+            await Log.Info(logNewCommand.ToString());
         }
         
         private async void ForceBoosterRewardPayoutAll_OnClick(object sender, RoutedEventArgs e)
@@ -434,7 +434,7 @@ namespace RoleRewardBot
             logReport.AppendLine($"Discord ID   -> {updatedDiscordID}");
             logReport.AppendLine($"Expiry       -> [{newExpiryInDays} days]{DateTime.Now + TimeSpan.FromDays(newExpiryInDays)}");
             
-            Log.Warn(logReport);
+            await Log.Warn(logReport.ToString());
             PayoutList.ItemsSource = null;
             PayoutList.ItemsSource = Instance.Config.Payouts;
 
@@ -471,7 +471,7 @@ namespace RoleRewardBot
             logDeletePayout.AppendLine($"Command      -> {payout.Command}");
             logDeletePayout.AppendLine($"Expires      -> ({payout.DaysUntilExpired.ToString()} days)  {Instance.Config.Payouts[PayoutList.SelectedIndex].ExpiryDate}");
 
-            Log.Warn(logDeletePayout);
+            await Log.Warn(logDeletePayout.ToString());
             Instance.Config.Payouts.Remove(payout); 
             await Instance.Save();
         }

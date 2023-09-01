@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using System.Timers;
 using System.Windows;
 using DSharpPlus.Entities;
-using NLog;
 using RoleRewardBot.Objects;
 using Sandbox.Game.Multiplayer;
 using Sandbox.Game.World;
@@ -18,7 +17,7 @@ namespace RoleRewardBot.Utils
     public sealed class PayManager
     {
         private static MainConfig Config => RoleRewardBot.Instance.Config;
-        private Logger Log = LogManager.GetLogger("Role Rewards Bot Payout Manager");
+        private static CustomLogger.LogManager Log => RoleRewardBot.Log;
         private readonly Timer _payoutTimer = new Timer(60000); // Checks for bot and server status every minute to issue payout, or dispose timer if payout already issued for the day.
 
         public PayManager()
@@ -55,30 +54,31 @@ namespace RoleRewardBot.Utils
         /// <summary>
         /// Runs through all the Rewards setup and checks if any registered user qualifies to receive it.
         /// </summary>
-        /// <param name="rewardID"></param>
+        /// <param name="rewardId"></param>
         /// <param name="payAll">False: Only qualifying registered users will receive rewards.  True: ALL registered users will receive rewards.</param>
-        public async Task Payout(int rewardID = 0, bool payAll = false)
+        /// <param name="payUnpaid">For use when user wants to rerun the payout for new members.</param>
+        public async Task Payout(int rewardId = 0, bool payAll = false, bool payUnpaid = false)
         {
             if (!RoleRewardBot.DiscordBot.IsConnected)
             {
-                Log.Warn("Unable to process rewards while the Discord bot is offline.");
+                await Log.Warn("Unable to process rewards while the Discord bot is offline.");
                 return;
             }
             
-            List<MyPlayer> _onlineUsers = new List<MyPlayer>();
-            Dictionary<ulong, MyPlayer> OnlinePlayers = new Dictionary<ulong, MyPlayer>();
+            List<MyPlayer> onlineUsers = new List<MyPlayer>();
+            Dictionary<ulong, MyPlayer> onlinePlayers = new Dictionary<ulong, MyPlayer>();
             
             if (RoleRewardBot.Instance.WorldOnline)
             {
                 // Grab online players to display announcements.
                 if(RoleRewardBot.Instance.WorldOnline)
-                    _onlineUsers = Sync.Players.GetOnlinePlayers().ToList();
+                    onlineUsers = Sync.Players.GetOnlinePlayers().ToList();
 
-                foreach (MyPlayer onlineUser in _onlineUsers)
+                foreach (MyPlayer onlineUser in onlineUsers)
                 {
                     // This shouldn't be needed as the player list is reset on every run, but for somebody it seems to throw because of duplicate keys.
-                    if (!OnlinePlayers.ContainsKey(onlineUser.Id.SteamId))
-                        OnlinePlayers.Add(onlineUser.Id.SteamId, onlineUser);  
+                    if (!onlinePlayers.ContainsKey(onlineUser.Id.SteamId))
+                        onlinePlayers.Add(onlineUser.Id.SteamId, onlineUser);  
                 }
             }
 
@@ -87,9 +87,9 @@ namespace RoleRewardBot.Utils
 
             if (!payAll)
             {
-                if (Config.lastScheduledPayoutProcessed.Day == DateTime.Now.Day)
+                if (Config.lastScheduledPayoutProcessed.Day == DateTime.Now.Day && !payUnpaid)
                 {
-                    Log.Info("Scheduled payout already processed today.");
+                    await Log.Info("Scheduled payout already processed today.");
                     return;
                 }
                 
@@ -107,8 +107,16 @@ namespace RoleRewardBot.Utils
                         bool payhimhisdues = false;
                         foreach (string intPayDays in rewardPayoutDays)
                         {
-                            if (!int.TryParse(intPayDays, out int intPayDay)) continue;
+                            if (!int.TryParse(intPayDays, out int intPayDay))
+                            {
+                                await Log.Warn($"Unable to get integer value pay date for reward {reward.Name} [{intPayDays}]");
+                                continue;
+                            }
                             if (intPayDay != DateTime.Now.Day) continue;
+                            
+                            if (registeredUser.LastPayouts.TryGetValue(reward.ID, out DateTime lastPayout))
+                                if (lastPayout.Day == DateTime.Now.Day) continue;
+                            
                             payhimhisdues = true;
                             break;
                         }
@@ -136,6 +144,7 @@ namespace RoleRewardBot.Utils
                                 Command = finishCommand
                             };
 
+                            payoutReport.AppendLine();
                             payoutReport.AppendLine("*   Payout Report   *");
                             payoutReport.AppendLine($"ID           -> {payTheMan.ID}");
                             payoutReport.AppendLine($"Reward Name  -> {payTheMan.RewardName}");
@@ -148,8 +157,10 @@ namespace RoleRewardBot.Utils
                             payoutReport.AppendLine("--------------------------------------------------");
 
                             Config.Payouts.Add(payTheMan);
+                            registeredUser.LastPayouts.TryGetValue(reward.ID, out DateTime lastPayout);
+                            registeredUser.LastPayouts[reward.ID] = DateTime.Now;
 
-                            if (OnlinePlayers.ContainsKey(registeredUser.IngameSteamId))
+                            if (onlinePlayers.ContainsKey(registeredUser.IngameSteamId))
                             {
                                 // Announce to player in game.
                                 ModCommunication.SendMessageTo(new DialogMessage($"Reward Bot", null, null, $"You have a new reward to claim", "Understood!"), registeredUser.IngameSteamId);
@@ -165,21 +176,28 @@ namespace RoleRewardBot.Utils
                                 }
                                 catch (Exception e)
                                 {
-                                    Log.Warn(e.ToString());
+                                    await Log.Warn(e.ToString());
                                 }
                             }
                         }
                     }
                 }
 
-                if (string.IsNullOrEmpty(payoutReport.ToString())) return;
-                Log.Info(payoutReport);
+                if (string.IsNullOrEmpty(payoutReport.ToString()))
+                {
+                    if (payUnpaid)
+                    {
+                        await Log.Info("PayUnpaid was requested but no registered users who are eligible were found to pay.");
+                    }
+                    return;
+                }
+                await Log.Info(payoutReport.ToString());
                 await RoleRewardBot.Instance.Save();
                 return;
             }
             
             // PAY ALL!!!
-            if (rewardID < 1) // ID start at 1 on purpose, no selection sends 0 as default.
+            if (rewardId < 1) // ID start at 1 on purpose, no selection sends 0 as default.
             {
                 MessageBox.Show("An attempt to force-pay all members a reward has failed, invalid reward selected.","Error",MessageBoxButton.OK,MessageBoxImage.Information);
                 return;
@@ -200,7 +218,7 @@ namespace RoleRewardBot.Utils
             
             if (!RoleRewardBot.DiscordBot.IsConnected)
             {
-                Log.Warn("Unable to process rewards while the Discord bot is offline.");
+                await Log.Warn("Unable to process rewards while the Discord bot is offline.");
                 return;
             }
 
@@ -210,7 +228,7 @@ namespace RoleRewardBot.Utils
                 Reward selectedReward = null;
                 for (int index = Config.Rewards.Count - 1; index >= 0; index--)
                 {
-                    if (Config.Rewards[index].ID != rewardID) continue;
+                    if (Config.Rewards[index].ID != rewardId) continue;
                     selectedReward = Config.Rewards[index];
                     break;
                 }
@@ -245,6 +263,8 @@ namespace RoleRewardBot.Utils
                             Command = finishCommand
                         };
                             
+                        payoutReport.AppendLine();
+                        payoutReport.AppendLine("*   Payout Report   *");
                         payoutReport.AppendLine($"ID           -> {payTheMan.ID}");
                         payoutReport.AppendLine($"Reward Name  -> {payTheMan.RewardName}");
                         payoutReport.AppendLine($"Discord Name -> {payTheMan.DiscordName}");
@@ -257,7 +277,7 @@ namespace RoleRewardBot.Utils
 
                         Config.Payouts.Add(payTheMan);
                         
-                        if (OnlinePlayers.ContainsKey(registeredUser.IngameSteamId))
+                        if (onlinePlayers.ContainsKey(registeredUser.IngameSteamId))
                         {
                             // Announce to player in game.
                             ModCommunication.SendMessageTo(new DialogMessage($"Reward Bot", null, null, $"You have a new reward to claim", "Understood!"), registeredUser.IngameSteamId);
@@ -273,18 +293,18 @@ namespace RoleRewardBot.Utils
                             }
                             catch (Exception e)
                             {
-                                Log.Warn(e.ToString());
+                                await Log.Warn(e.ToString());
                             }
                         }
                     }
                 }
             } catch (Exception e)
             {
-                Log.Error(e.ToString());
+                await Log.Error(e.ToString());
             }
 
             await RoleRewardBot.Instance.Save();
-            Log.Warn(payoutReport);
+            await Log.Warn(payoutReport.ToString());
         }
 
         public async Task ManualPayout
@@ -325,7 +345,7 @@ namespace RoleRewardBot.Utils
             payoutReport.AppendLine($"Expires      -> [{payTheMan.DaysUntilExpired} days] {payTheMan.ExpiryDate.ToShortDateString()}");
             payoutReport.AppendLine($"--------------------------------------------------");
 
-            Log.Warn(payoutReport);
+            await Log.Warn(payoutReport.ToString());
             Config.Payouts.Add(payTheMan);
             await RoleRewardBot.Instance.Save();
         }
@@ -335,7 +355,7 @@ namespace RoleRewardBot.Utils
             for (int index = Config.Payouts.Count - 1; index >= 0; index--)
             {
                 if (Config.Payouts[index].ExpiryDate.Date > DateTime.Now.Date) continue;
-                Log.Info($"Removed expired payout for {Config.Payouts[index].IngameName} [{Config.Payouts[index].RewardName}]");
+                await Log.Info($"Removed expired payout for {Config.Payouts[index].IngameName} [{Config.Payouts[index].RewardName}]");
                 Config.Payouts.Remove(Config.Payouts[index]);
             }
 

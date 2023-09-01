@@ -1,4 +1,5 @@
 ﻿using System;
+using RoleRewardBot.Utils;
 
 namespace RoleRewardBot.Objects
 {
@@ -9,5 +10,6 @@ namespace RoleRewardBot.Objects
         public string DiscordUsername { get; set; }
         public ulong DiscordId { get; set; }
         public DateTime Registered { get; set; }
+        public SerializableDictionary<int, DateTime> LastPayouts { get; set; } = new SerializableDictionary<int, DateTime>();
     }
 }

@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using NLog;
 using Torch.API.Managers;
 using Torch.Commands;
 
@@ -9,7 +8,7 @@ namespace RoleRewardBot.Utils
     public class TorchCommandManager
     {
         private CommandManager _manager;
-        private Logger Log = LogManager.GetLogger("RoleRewardBot => TorchCommandManager");
+        private CustomLogger.LogManager Log => RoleRewardBot.Log;
 
         private Task<bool> GetTorchCommandManager()
         {
@@ -29,13 +28,13 @@ namespace RoleRewardBot.Utils
                 return;
                 
             if (_manager == null)
-                Log.Error($"Command Manager unable to run command [{command}].  Torch has no active command manager.");
+                await Log.Error($"Command Manager unable to run command [{command}].  Torch has no active command manager.");
             
             if (!RoleRewardBot.Instance.WorldOnline)
-                Log.Error($"Command Manager unable to run command [{command}].  The server is offline.");
+                await Log.Error($"Command Manager unable to run command [{command}].  The server is offline.");
             
             _manager?.HandleCommandFromServer(command);
-            Log.Info("Command [{0}] executed.", command);
+            await Log.Info($"Command [{command}] executed.");
         }
 
         public async Task RunSlow(List<string> commands)
@@ -45,10 +44,10 @@ namespace RoleRewardBot.Utils
             // task in awaitable state, so everything else can still run.
             
             if (await GetTorchCommandManager() == false)
-                Log.Error($"Command Manager unable to run (slow) commands.  Torch has no active command manager.");
+                await Log.Error($"Command Manager unable to run (slow) commands.  Torch has no active command manager.");
             
             if (!RoleRewardBot.Instance.WorldOnline)
-                Log.Error($"Command Manager unable to run (slow) command.  The server is offline.");
+                await Log.Error($"Command Manager unable to run (slow) command.  The server is offline.");
 
             foreach (string command in commands)
             {

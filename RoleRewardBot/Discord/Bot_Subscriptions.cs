@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
-using NLog;
 using RoleRewardBot.Objects;
 using static RoleRewardBot.RoleRewardBot;
 
@@ -15,12 +14,12 @@ namespace RoleRewardBot.Discord
     {
         private Bot m_bot => DiscordBot;
         private List<DiscordGuild> m_guilds = new List<DiscordGuild>();
-        private Logger Log = LogManager.GetLogger("Rewards Discord Bot => Subscriptions");
+        private CustomLogger.LogManager Log => RoleRewardBot.Log;
         IReadOnlyCollection<DiscordMember> m_members;
 
         public async Task Client_GuildDownloadCompleted(DiscordClient sender, GuildDownloadCompletedEventArgs args)
         {
-            Log.Info("Guild Download Completed");
+            await Log.Info("Guild Download Completed");
             // Make sure we have all Guild(s) data!
             foreach (KeyValuePair<ulong,DiscordGuild> discordGuild in m_bot.Client.Guilds)
             {
@@ -33,11 +32,11 @@ namespace RoleRewardBot.Discord
             
             // Pointer to guild data, this is not a sharded bot!
             m_bot.ServerData.guild = m_guilds[0];
-            Log.Info("Guild Data Retrieved for " + m_guilds[0].Name + " (" + m_guilds[0].Id + ")");
+            await Log.Info("Guild Data Retrieved for " + m_guilds[0].Name + " (" + m_guilds[0].Id + ")");
 
             // Get all members
             m_members = await m_guilds[0].GetAllMembersAsync();
-            Log.Info($"{m_members.Count} members retrieved.");
+            await Log.Info($"{m_members.Count} members retrieved.");
             
             m_bot.ServerData.roles = m_guilds[0].Roles;
             
@@ -90,7 +89,7 @@ namespace RoleRewardBot.Discord
                         }
                     } catch (Exception e)
                     {
-                        Log.Error(e, "Managed Role ID provided is invalid.");
+                        await Log.Error("Managed Role ID provided is invalid: " + e);
                     }
                 }
             }

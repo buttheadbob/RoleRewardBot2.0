@@ -76,7 +76,7 @@ namespace RoleRewardBot
                 if (!RoleRewardBot.Instance.Config.ManageRegisteredRole) return;
                 if (!ulong.TryParse(RoleRewardBot.Instance.Config.RegisteredRoleId, out ulong roleId))
                 {
-                    RoleRewardBot.Log.Error("Invalid Role ID for registered role.  Please check your settings.");
+                    await RoleRewardBot.Log.Error("Invalid Role ID for registered role.  Please check your settings.");
                     return;
                 }
                 
@@ -87,7 +87,7 @@ namespace RoleRewardBot
                 }
                 catch (Exception e)
                 {
-                    RoleRewardBot.Log.Error("Error trying to revoke role to user after unlinking." + e);
+                    await RoleRewardBot.Log.Error("Error trying to revoke role to user after unlinking." + e);
                 }
                 
                 return;

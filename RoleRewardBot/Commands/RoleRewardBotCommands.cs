@@ -73,7 +73,7 @@ namespace RoleRewardBot
                         }
                         catch (Exception e)
                         {
-                            RoleRewardBot.Log.Error("Error trying to assign role to new registered user." + e);
+                            await RoleRewardBot.Log.Error("Error trying to assign role to new registered user." + e);
                         }
                     }
                 }
@@ -115,7 +115,7 @@ namespace RoleRewardBot
                 if (!Plugin.Config.ManageRegisteredRole) return;
                 if (!ulong.TryParse(Plugin.Config.RegisteredRoleId, out ulong roleId))
                 {
-                    RoleRewardBot.Log.Error("Invalid Role ID for registered role.  Please check your settings.");
+                    await RoleRewardBot.Log.Error("Invalid Role ID for registered role.  Please check your settings.");
                     return;
                 }
                 try
@@ -125,7 +125,7 @@ namespace RoleRewardBot
                 }
                 catch (Exception e)
                 {
-                    RoleRewardBot.Log.Error("Error trying to revoke role to user after unlinking." + e);
+                    await RoleRewardBot.Log.Error("Error trying to revoke role to user after unlinking." + e);
                 }
             }
             else 

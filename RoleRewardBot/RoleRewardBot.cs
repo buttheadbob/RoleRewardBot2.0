@@ -18,7 +18,8 @@ namespace RoleRewardBot
 {
     public class RoleRewardBot : TorchPluginBase, IWpfPlugin
     {
-        public static readonly Logger Log = LogManager.GetCurrentClassLogger();
+        public static readonly CustomLogger.LogManager Log = new CustomLogger.LogManager("Role Reward Bot");
+        //public static readonly Logger Log = LogManager.GetCurrentClassLogger();
         private static readonly string CONFIG_FILE_NAME = "RoleRewardBot_Config.cfg";
         private RoleRewardBotControl _control;
         public UserControl GetControl() => _control ?? (_control = new RoleRewardBotControl(this));
@@ -40,7 +41,7 @@ namespace RoleRewardBot
             if (sessionManager != null)
                 sessionManager.SessionStateChanged += SessionChanged;
             else
-                Log.Warn("No session manager loaded!");
+                await Log.Warn("No session manager loaded!");
 
             await Save();
             
@@ -55,7 +56,7 @@ namespace RoleRewardBot
             switch (state)
             {
                 case TorchSessionState.Loaded:
-                    Log.Info("Session Loaded!");
+                    await Log.Info("Session Loaded!");
                     WorldOnline = true;
                     if (DiscordBot.IsConnected)
                         await DiscordBot.Client.UpdateStatusAsync(new DiscordActivity(Instance.Config.StatusMessage, ActivityType.Playing), UserStatus.Online);
@@ -69,7 +70,7 @@ namespace RoleRewardBot
                     break;
 
                 case TorchSessionState.Unloading:
-                    Log.Info("Session Unloading!");
+                    await Log.Info("Session Unloading!");
                     WorldOnline = false;
                     if (DiscordBot.IsConnected)
                         await DiscordBot.Client.UpdateStatusAsync(new DiscordActivity("for the server to come online...", ActivityType.Watching), UserStatus.DoNotDisturb);
@@ -77,7 +78,7 @@ namespace RoleRewardBot
             }
         }
 
-        private void SetupConfig()
+        private async void SetupConfig()
         {
             var configFile = Path.Combine(StoragePath, CONFIG_FILE_NAME);
 
@@ -88,30 +89,29 @@ namespace RoleRewardBot
             }
             catch (Exception e)
             {
-                Log.Warn(e);
+                await Log.Warn(e.ToString());
             }
 
             if (_config?.Data == null)
             {
-                Log.Info("Create Default Config, because none was found!");
+                await Log.Info("Create Default Config, because none was found!");
 
                 _config = new Persistent<MainConfig>(configFile, new MainConfig());
                 _config.Save();
             }
         }
 
-        public Task Save()
+        public async Task Save()
         {
             try
             {
                 _config.Save();
-                Log.Info("Configuration Saved.");
+                await Log.Info("Configuration Saved.");
             }
             catch (IOException e)
             {
-                Log.Warn(e, "Configuration failed to save");
+                await Log.Warn(" Configuration failed to save: " + e.ToString());
             }
-            return Task.CompletedTask;
         }
 
         public override void Dispose()

@@ -30,6 +30,9 @@
     <Reference Include="ConcurrentCollections, Version=1.3.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>packages\ConcurrentHashSet.1.3.0\lib\net461\ConcurrentCollections.dll</HintPath>
     </Reference>
+    <Reference Include="CustomLogger">
+      <HintPath>..\..\UpsideDown\CustomLogger\bin\x64\Debug\CustomLogger.dll</HintPath>
+    </Reference>
     <Reference Include="DSharpPlus, Version=4.4.2.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>packages\DSharpPlus.4.4.2\lib\netstandard2.0\DSharpPlus.dll</HintPath>
     </Reference>
@@ -272,6 +275,7 @@
     <Compile Include="RoleRewardBot\Utils\ImportOldRewardBotConfig.cs" />
     <Compile Include="RoleRewardBot\Utils\NLogWrapper.cs" />
     <Compile Include="RoleRewardBot\Utils\PayManager.cs" />
+    <Compile Include="RoleRewardBot\Utils\SerializableDict.cs" />
     <Compile Include="RoleRewardBot\Utils\TorchCommandManager.cs" />
     <EmbeddedResource Include="RoleRewardBot\Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
