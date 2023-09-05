@@ -48,6 +48,17 @@ namespace RoleRewardBot.Discord
             DiscordBot.Client.GuildRoleDeleted += Client_GuildRoleDeleted;
             DiscordBot.Client.GuildRoleUpdated += Client_GuildRoleUpdated;
             DiscordBot.Client.SocketClosed += Client_SocketClosed;
+            DiscordBot.Client.SocketOpened += Client_SocketOpened;
+            
+            /*  Debug Section
+            DiscordBot.Client.Heartbeated += (sender1, e) => Log.Info("Heartbeat received:" + e);
+            DiscordBot.Client.Zombied += (sender1, e) => Log.Info("Zombied received:" + e);
+            DiscordBot.Client.SocketClosed += (sender1, e) => Log.Info("Socket Closed received: " + e);
+            DiscordBot.Client.ClientErrored += (sender1, e) => Log.Info("Client Errored received: " + e);
+            DiscordBot.Client.SocketErrored += (sender1, e) => Log.Info("Socket Errored received: " + e);
+            DiscordBot.Client.UnknownEvent += (sender1, e) => Log.Info("Unknown Event received: " + e);
+            DiscordBot.Client.SocketOpened += (sender1, e) => Log.Info("Socket Opened received: " + e);
+            */
             
             DiscordBot.ServerData.DiscordMembers.AddRange(m_members);
             
@@ -110,6 +121,12 @@ namespace RoleRewardBot.Discord
         private Task Client_SocketClosed(DiscordClient sender, SocketCloseEventArgs args)
         {
             DiscordBot.IsConnected = false;
+            return Task.CompletedTask;
+        }
+        
+        private Task Client_SocketOpened(DiscordClient sender, SocketEventArgs socketEventArgs)
+        {
+            DiscordBot.IsConnected = true;
             return Task.CompletedTask;
         }
 

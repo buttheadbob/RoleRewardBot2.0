@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
 using System.Windows;
@@ -11,6 +12,7 @@ using Sandbox.Game.Multiplayer;
 using Sandbox.Game.World;
 using Torch.Mod;
 using Torch.Mod.Messages;
+using Timer = System.Timers.Timer;
 
 namespace RoleRewardBot.Utils
 {
@@ -85,6 +87,7 @@ namespace RoleRewardBot.Utils
             // Report rewards issued!
             StringBuilder payoutReport = new StringBuilder();
 
+            int sendDiscordMemberCount = 0; // This is to track how many messages were sending so were not spamming 100 players with a message in 1 second.
             if (!payAll)
             {
                 if (Config.lastScheduledPayoutProcessed.Day == DateTime.Now.Day && !payUnpaid)
@@ -96,6 +99,7 @@ namespace RoleRewardBot.Utils
                 for (int userIndex = Config.RegisteredUsers.Count - 1; userIndex >= 0; userIndex--)
                 {
                     RegisteredUsers registeredUser = Config.RegisteredUsers[userIndex];
+                    int rewardCount = 0;
                     
                     DiscordUser member = await RoleRewardBot.DiscordBot.Client.GetUserAsync(Config.RegisteredUsers[userIndex].DiscordId);
                     
@@ -114,14 +118,16 @@ namespace RoleRewardBot.Utils
                             }
                             if (intPayDay != DateTime.Now.Day) continue;
                             
-                            if (registeredUser.LastPayouts.TryGetValue(reward.ID, out DateTime lastPayout))
-                                if (lastPayout.Day == DateTime.Now.Day) continue;
-                            
                             payhimhisdues = true;
                             break;
                         }
                         
                         if (!payhimhisdues) continue;
+
+                        if (registeredUser.LastPayouts.TryGetValue(reward.ID, out DateTime lastPayout))
+                        {
+                            if (lastPayout.Day == DateTime.Now.Day) continue;
+                        }
                         
                         // Only pay users with the appropriate role...
                         foreach (KeyValuePair<ulong, DiscordRole> memberRole in RoleRewardBot.DiscordBot.ServerData.roles)
@@ -129,6 +135,7 @@ namespace RoleRewardBot.Utils
                             if (memberRole.Value.Name != reward.RewardedRole) continue;
                             
                             // Payday!!
+                            rewardCount++;
                             string startCommand = reward.Command.Replace("{SteamID}", registeredUser.IngameSteamId.ToString());
                             string finishCommand = startCommand.Replace("{Username}", registeredUser.IngameName);
                             Payout payTheMan = new Payout
@@ -157,27 +164,58 @@ namespace RoleRewardBot.Utils
                             payoutReport.AppendLine("--------------------------------------------------");
 
                             Config.Payouts.Add(payTheMan);
-                            registeredUser.LastPayouts.TryGetValue(reward.ID, out DateTime lastPayout);
                             registeredUser.LastPayouts[reward.ID] = DateTime.Now;
-
-                            if (onlinePlayers.ContainsKey(registeredUser.IngameSteamId))
+                        }
+                    }
+                    
+                    if (rewardCount == 0) continue;
+                    
+                    if (onlinePlayers.ContainsKey(registeredUser.IngameSteamId))
+                    {
+                        // Announce to player in game.
+                        ModCommunication.SendMessageTo(rewardCount > 1
+                                ? new DialogMessage($"Reward Bot", null, null, $"You have a new reward to claim", "Understood!")
+                                : new DialogMessage($"Reward Bot", null, null, $"You have {rewardCount} new rewards to claim", "Understood!"), registeredUser.IngameSteamId);
+                    }
+                    else
+                    {
+                        // Announce to player on discord.
+                        if (!RoleRewardBot.DiscordBot.IsConnected) continue; // This shouldn't be needed but whatever lol
+                
+                        DiscordMember user = await RoleRewardBot.DiscordBot.ServerData.guild.GetMemberAsync(registeredUser.DiscordId);
+                        
+                        if (rewardCount == 1)
+                        {
+                            try
                             {
-                                // Announce to player in game.
-                                ModCommunication.SendMessageTo(new DialogMessage($"Reward Bot", null, null, $"You have a new reward to claim", "Understood!"), registeredUser.IngameSteamId);
+                                await RoleRewardBot.DiscordBot.DMSender.SendDirectMessage( user ,$"You have a new reward to claim.");
+                                sendDiscordMemberCount++;
+                                if (sendDiscordMemberCount == 40)
+                                {
+                                    await Task.Delay(5000); // Sleep for 5 seconds to prevent rate limiting.
+                                    sendDiscordMemberCount = 0;
+                                }
                             }
-                            else
+                            catch (Exception e)
                             {
-                                if (!RoleRewardBot.DiscordBot.IsConnected) continue;
-                                // Announce to player on discord.
-                                DiscordMember user = await RoleRewardBot.DiscordBot.ServerData.guild.GetMemberAsync(registeredUser.DiscordId);
-                                try
+                                await Log.Warn(e.ToString());
+                            }
+                        }
+                        else
+                        {
+                            try
+                            {
+                                await RoleRewardBot.DiscordBot.DMSender.SendDirectMessage( user ,$"You have {rewardCount} new rewards to claim.");
+                                sendDiscordMemberCount++;
+                                if (sendDiscordMemberCount == 40)
                                 {
-                                    await RoleRewardBot.DiscordBot.DMSender.SendDirectMessage( user ,$"You have a new reward to claim.");
+                                    await Task.Delay(5000); // Sleep for 5 seconds to prevent rate limiting.
+                                    sendDiscordMemberCount = 0;
                                 }
-                                catch (Exception e)
-                                {
-                                    await Log.Warn(e.ToString());
-                                }
+                            }
+                            catch (Exception e)
+                            {
+                                await Log.Warn(e.ToString());
                             }
                         }
                     }
@@ -221,7 +259,7 @@ namespace RoleRewardBot.Utils
                 await Log.Warn("Unable to process rewards while the Discord bot is offline.");
                 return;
             }
-
+            
             try
             {
                 // Get Selected Reward
@@ -243,6 +281,7 @@ namespace RoleRewardBot.Utils
                     DiscordMember _user = await RoleRewardBot.DiscordBot.ServerData.guild.GetMemberAsync(registeredUser.DiscordId);
                     if (_user is null) continue;
 
+                    int rewardCount = 0;
                     // Only pay users with the appropriate role...
                     foreach (DiscordRole role in _user.Roles)
                     {
@@ -275,21 +314,54 @@ namespace RoleRewardBot.Utils
                         payoutReport.AppendLine($"Expires      -> [{payTheMan.DaysUntilExpired} days] {payTheMan.ExpiryDate.ToShortDateString()}");
                         payoutReport.AppendLine($"--------------------------------------------------");
 
+                        rewardCount++;
                         Config.Payouts.Add(payTheMan);
+                    }
+                    if (onlinePlayers.ContainsKey(registeredUser.IngameSteamId))
+                    {
+                        if (rewardCount == 0) continue;
                         
-                        if (onlinePlayers.ContainsKey(registeredUser.IngameSteamId))
-                        {
-                            // Announce to player in game.
+                        // Announce to player in game.
+                        if (rewardCount == 1)
                             ModCommunication.SendMessageTo(new DialogMessage($"Reward Bot", null, null, $"You have a new reward to claim", "Understood!"), registeredUser.IngameSteamId);
+                        else
+                            ModCommunication.SendMessageTo(new DialogMessage($"Reward Bot", null, null, $"You have a new reward to claim", "Understood!"), registeredUser.IngameSteamId);
+                    }
+                    else
+                    {
+                        if (!RoleRewardBot.DiscordBot.IsConnected) continue;
+                        // Announce to player on discord.
+                        
+                        if (rewardCount == 0) continue;
+                        
+                        if (rewardCount == 1)
+                        {
+                            try
+                            {
+                                await RoleRewardBot.DiscordBot.DMSender.SendDirectMessage(_user, $"You have a new reward to claim.");
+                                sendDiscordMemberCount++;
+                                if (sendDiscordMemberCount == 40)
+                                {
+                                    await Task.Delay(5000); // Sleep for 5 seconds to prevent rate limiting.
+                                    sendDiscordMemberCount = 0;
+                                }
+                            }
+                            catch (Exception e)
+                            {
+                                await Log.Warn(e.ToString());
+                            }
                         }
                         else
                         {
-                            if (!RoleRewardBot.DiscordBot.IsConnected) continue;
-                            // Announce to player on discord.
-                            DiscordMember user = await RoleRewardBot.DiscordBot.ServerData.guild.GetMemberAsync(registeredUser.DiscordId);
                             try
                             {
-                                await RoleRewardBot.DiscordBot.DMSender.SendDirectMessage(user, $"You have a new reward(s) to claim.");
+                                await RoleRewardBot.DiscordBot.DMSender.SendDirectMessage(_user, $"You have {rewardCount} new rewards to claim.");
+                                sendDiscordMemberCount++;
+                                if (sendDiscordMemberCount == 40)
+                                {
+                                    await Task.Delay(5000); // Sleep for 5 seconds to prevent rate limiting.
+                                    sendDiscordMemberCount = 0;
+                                }
                             }
                             catch (Exception e)
                             {

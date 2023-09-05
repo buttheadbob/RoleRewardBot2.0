@@ -311,7 +311,6 @@
                                 <DataGridTextColumn Header="SteamID" Binding="{Binding Path=IngameSteamId}" Width="Auto" IsReadOnly="True"/>
                                 <DataGridTextColumn Header="Discord Name" Binding="{Binding Path=DiscordUsername}" Width="Auto" IsReadOnly="True"/>
                                 <DataGridTextColumn Header="Discord ID" Binding="{Binding Path=DiscordId}" Width="Auto" IsReadOnly="True"/>
-                                <DataGridTextColumn Header="Last Payout" Binding="{Binding Path=LastPayout}" Width="Auto" IsReadOnly="True"/>
                                 <DataGridTextColumn Header="Registered" Binding="{Binding Path=Registered}" Width="*" IsReadOnly="True"/>
                             </DataGrid.Columns>
                         </DataGrid>
